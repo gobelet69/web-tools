@@ -28,6 +28,7 @@
       <button onclick="convert('title')">Title Case</button>
       <button onclick="convert('cap')">Capitalize</button>
       <button onclick="convert('reverse')">esreveR</button>
+      <button onclick="convert('random')">rAnDoM CaSe</button>
     </div>
 
     <fieldset>
@@ -59,6 +60,8 @@
         res = text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
       } else if (type === 'reverse') {
         res = text.split('').reverse().join('');
+      } else if (type === 'random') {
+        res = text.split('').map(c => Math.random() > 0.5 ? c.toUpperCase() : c.toLowerCase()).join('');
       }
       output.value = res;
     }
