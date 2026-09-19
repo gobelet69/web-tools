@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV to JSON - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>CSV to JSON</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset><legend>Input CSV</legend><textarea id="input-text" rows="6" style="width: 100%; box-sizing: border-box;"></textarea></fieldset>
+    <fieldset><legend>Output JSON Array</legend><textarea id="output-text" rows="10" style="width: 100%; box-sizing: border-box;" readonly></textarea></fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('csv-to-json');
+    function parseCSV(str) { return str.split('\n').filter(l=>l.trim()).map(l => l.split(',').map(c => c.trim())); }
+    document.getElementById('input-text').addEventListener('input', (e) => {
+      const data = parseCSV(e.target.value);
+      if(data.length < 2) { document.getElementById('output-text').value = ''; return; }
+      const headers = data[0];
+      const res = [];
+      for(let i=1; i<data.length; i++) {
+        let obj = {};
+        for(let j=0; j<headers.length; j++) obj[headers[j]] = data[i][j];
+        res.push(obj);
+      }
+      document.getElementById('output-text').value = JSON.stringify(res, null, 2);
+    });
+  </script>
+</body>
+</html>

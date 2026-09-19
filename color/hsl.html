@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HSL Converter - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>HSL Converter</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>HSL Input</legend>
+      <label>H (0-360): <input type="number" id="h" value="200" min="0" max="360"></label>
+      <label>S (0-100%): <input type="number" id="s" value="50" min="0" max="100"></label>
+      <label>L (0-100%): <input type="number" id="l" value="50" min="0" max="100"></label>
+    </fieldset>
+    <fieldset>
+      <legend>Preview & CSS</legend>
+      <div id="preview" style="width:100%; height:100px; border-radius:4px; border:1px solid #ccc;"></div>
+      <p>HSL: <strong id="out-hsl">hsl(200, 50%, 50%)</strong></p>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('hsl-converter');
+    const update = () => {
+      const h = document.getElementById('h').value;
+      const s = document.getElementById('s').value;
+      const l = document.getElementById('l').value;
+      const hsl = `hsl(${h}, ${s}%, ${l}%)`;
+      document.getElementById('preview').style.background = hsl;
+      document.getElementById('out-hsl').textContent = hsl;
+    };
+    ['h','s','l'].forEach(id => document.getElementById(id).addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

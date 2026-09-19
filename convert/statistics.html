@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Basic Statistics - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Basic Statistics</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>Input Numbers (comma or space separated)</legend>
+      <textarea id="input-text" rows="4" style="width: 100%; box-sizing: border-box;">1, 2, 3, 4, 5</textarea>
+    </fieldset>
+    <fieldset>
+      <legend>Results</legend>
+      <p>Count: <strong id="count">0</strong></p>
+      <p>Sum: <strong id="sum">0</strong></p>
+      <p>Mean (Average): <strong id="mean">0</strong></p>
+      <p>Median: <strong id="median">0</strong></p>
+      <p>Min: <strong id="min">0</strong></p>
+      <p>Max: <strong id="max">0</strong></p>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('statistics');
+    document.getElementById('input-text').addEventListener('input', (e) => {
+      const str = e.target.value.replace(/,/g, ' ').split(/\s+/);
+      const nums = str.map(Number).filter(n => !isNaN(n));
+      if(nums.length === 0) return;
+      nums.sort((a,b)=>a-b);
+      const count = nums.length;
+      const sum = nums.reduce((a,b)=>a+b, 0);
+      const mean = sum/count;
+      const median = count%2===0 ? (nums[count/2-1]+nums[count/2])/2 : nums[Math.floor(count/2)];
+      document.getElementById('count').textContent = count;
+      document.getElementById('sum').textContent = sum;
+      document.getElementById('mean').textContent = mean;
+      document.getElementById('median').textContent = median;
+      document.getElementById('min').textContent = nums[0];
+      document.getElementById('max').textContent = nums[count-1];
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Split & Extract - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+  <!-- Load pdf-lib from local vendor folder -->
+  <script src="../vendor/pdf-lib.min.js"></script>
+</head>
+<body>
+  <header>
+    <nav><a href="../index.html">← Back to Tools</a></nav>
+    <h1>PDF Split & Extract</h1>
+    <button id="fav-btn">☆ Add to Favorites</button>
+    <p>Extract specific pages from a PDF document.</p>
+    <p><em>Processed locally in your browser. Your files are not uploaded.</em></p>
+  </header>
+
+  <main>
+    <fieldset id="drop-zone">
+      <legend>Select PDF</legend>
+      <input type="file" id="file-input" accept="application/pdf">
+      <p>Or drag & drop it here</p>
+    </fieldset>
+
+    <fieldset id="controls" disabled>
+      <legend>Extract Pages</legend>
+      <p>File: <strong id="file-info"></strong></p>
+      <p>Total Pages: <strong id="total-pages"></strong></p>
+      
+      <label>
+        Pages to extract (comma separated, supports ranges):<br>
+        <input type="text" id="page-input" placeholder="e.g. 1, 3, 5-10" style="width: 100%; box-sizing: border-box; padding: 0.5rem;">
+      </label>
+      <br><br>
+      <button id="process-btn" style="padding: 0.5rem 1rem; font-weight: bold;">Extract & Download</button>
+      <span id="status-msg" style="margin-left: 1rem;"></span>
+    </fieldset>
+  </main>
+
+  <script>
+    'use strict';
+    Common.initTool('pdf-split');
+
+    const fileInput = document.getElementById('file-input');
+    const processBtn = document.getElementById('process-btn');
+    const controls = document.getElementById('controls');
+    const statusMsg = document.getElementById('status-msg');
+    
+    let currentPdfDoc = null;
+    let currentFile = null;
+
+    Common.setupDropZone('drop-zone', 'file-input', async (file) => {
+      if (!file || file.type !== 'application/pdf') return;
+      currentFile = file;
+      
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        currentPdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+        
+        document.getElementById('file-info').textContent = `${file.name} (${Common.formatBytes(file.size)})`;
+        document.getElementById('total-pages').textContent = currentPdfDoc.getPageCount();
+        
+        controls.disabled = false;
+      } catch (err) {
+        console.error(err);
+        alert('Could not parse PDF file.');
+      }
+    });
+
+    // Parse string "1, 3, 5-10" into array of 0-indexed page numbers
+    function parsePageRanges(inputStr, maxPages) {
+      const pages = new Set();
+      const parts = inputStr.split(',');
+      
+      for (let p of parts) {
+        p = p.trim();
+        if (!p) continue;
+        
+        if (p.includes('-')) {
+          const range = p.split('-');
+          let start = parseInt(range[0], 10);
+          let end = parseInt(range[1], 10);
+          if (!isNaN(start) && !isNaN(end)) {
+            start = Math.max(1, start);
+            end = Math.min(maxPages, end);
+            for (let i = start; i <= end; i++) pages.add(i - 1);
+          }
+        } else {
+          const num = parseInt(p, 10);
+          if (!isNaN(num) && num >= 1 && num <= maxPages) {
+            pages.add(num - 1);
+          }
+        }
+      }
+      return Array.from(pages).sort((a, b) => a - b);
+    }
+
+    processBtn.addEventListener('click', async () => {
+      if (!currentPdfDoc) return;
+      
+      const inputStr = document.getElementById('page-input').value;
+      const maxPages = currentPdfDoc.getPageCount();
+      const pageIndices = parsePageRanges(inputStr, maxPages);
+      
+      if (pageIndices.length === 0) {
+        alert('Please enter valid page numbers to extract.');
+        return;
+      }
+      
+      try {
+        statusMsg.textContent = 'Processing...';
+        processBtn.disabled = true;
+        
+        const newPdf = await PDFLib.PDFDocument.create();
+        const copiedPages = await newPdf.copyPages(currentPdfDoc, pageIndices);
+        copiedPages.forEach((page) => newPdf.addPage(page));
+        
+        const pdfBytes = await newPdf.save();
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        
+        const outName = currentFile.name.replace('.pdf', '') + '-extracted.pdf';
+        Common.downloadBlob(blob, outName);
+        
+        statusMsg.textContent = 'Done!';
+      } catch (err) {
+        console.error(err);
+        statusMsg.textContent = 'Error extracting pages.';
+        statusMsg.style.color = 'red';
+      } finally {
+        processBtn.disabled = false;
+        setTimeout(() => { if(statusMsg.textContent === 'Done!') statusMsg.textContent = ''; }, 3000);
+      }
+    });
+  </script>
+</body>
+</html>

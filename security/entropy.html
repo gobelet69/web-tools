@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Entropy - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Password Entropy</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>Password Input</legend>
+      <input type="text" id="pwd" style="width:100%; font-family:monospace; font-size:1.2rem;">
+      <p><em>(Evaluated completely locally. Never typed on a server.)</em></p>
+    </fieldset>
+    <fieldset>
+      <legend>Analysis</legend>
+      <p>Length: <strong id="len">0</strong></p>
+      <p>Pool Size (Possible Chars): <strong id="pool">0</strong></p>
+      <p>Entropy: <strong id="entropy" style="font-size:1.5rem;">0 bits</strong></p>
+      <p>Strength: <strong id="strength"></strong></p>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('password-entropy');
+    document.getElementById('pwd').addEventListener('input', (e) => {
+      const pwd = e.target.value;
+      let pool = 0;
+      if(/[a-z]/.test(pwd)) pool += 26;
+      if(/[A-Z]/.test(pwd)) pool += 26;
+      if(/[0-9]/.test(pwd)) pool += 10;
+      if(/[^a-zA-Z0-9]/.test(pwd)) pool += 32;
+      
+      const entropy = pool === 0 ? 0 : pwd.length * Math.log2(pool);
+      document.getElementById('len').textContent = pwd.length;
+      document.getElementById('pool').textContent = pool;
+      document.getElementById('entropy').textContent = entropy.toFixed(2) + ' bits';
+      
+      let str = 'Very Weak';
+      if(entropy > 120) str = 'Excellent';
+      else if(entropy > 80) str = 'Strong';
+      else if(entropy > 60) str = 'Reasonable';
+      else if(entropy > 40) str = 'Weak';
+      document.getElementById('strength').textContent = str;
+    });
+  </script>
+</body>
+</html>

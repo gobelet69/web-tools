@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Compress - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header>
+    <nav><a href="../index.html">← Back to Tools</a></nav>
+    <h1>Image Compress</h1>
+    <button id="fav-btn">☆ Add to Favorites</button>
+    <p>Compress images by adjusting quality (JPG/WebP).</p>
+    <p><em>Processed locally in your browser. Your files are not uploaded.</em></p>
+  </header>
+
+  <main>
+    <fieldset id="drop-zone" style="border: 2px dashed #ccc; padding: 1rem; margin-bottom: 1rem;">
+      <legend>Select Image</legend>
+      <input type="file" id="file-input" accept="image/jpeg, image/webp, image/png">
+      <p>Or drag & drop an image here</p>
+    </fieldset>
+
+    <fieldset id="controls" disabled>
+      <legend>Compression Settings</legend>
+      <label>
+        Target Format:
+        <select id="format-select">
+          <option value="image/jpeg">JPG</option>
+          <option value="image/webp">WebP</option>
+        </select>
+      </label>
+      <br>
+      <label>
+        Quality: <span id="q-val">0.7</span>
+        <input type="range" id="quality-input" min="0.1" max="1.0" step="0.05" value="0.7">
+      </label>
+      <br><br>
+      <button id="process-btn">Compress & Download</button>
+    </fieldset>
+
+    <fieldset id="info" hidden>
+      <legend>Information</legend>
+      <p>Original Size: <strong id="orig-size"></strong></p>
+      <p>Compressed Size: <strong id="new-size"></strong></p>
+      <p>Reduction: <strong id="reduction"></strong></p>
+    </fieldset>
+    
+  </main>
+
+  <script>
+    'use strict';
+    Common.initTool('image-compress');
+
+    const qualityInput = document.getElementById('quality-input');
+    const formatSelect = document.getElementById('format-select');
+    const qVal = document.getElementById('q-val');
+    const processBtn = document.getElementById('process-btn');
+    const controls = document.getElementById('controls');
+    
+    let currentImage = null;
+    let origFile = null;
+
+    Common.setupDropZone('drop-zone', 'file-input', (file) => {
+      if (!file || !file.type.startsWith('image/')) return;
+      origFile = file;
+      document.getElementById('orig-size').textContent = Common.formatBytes(file.size);
+      
+      const img = new Image();
+      img.onload = () => {
+        currentImage = img;
+        controls.disabled = false;
+        URL.revokeObjectURL(img.src);
+        
+        // Auto-select WebP for PNG input, otherwise preserve JPEG if JPEG
+        if (file.type === 'image/jpeg') formatSelect.value = 'image/jpeg';
+        else formatSelect.value = 'image/webp';
+      };
+      img.src = URL.createObjectURL(file);
+    });
+
+    qualityInput.addEventListener('input', () => {
+      qVal.textContent = qualityInput.value;
+    });
+
+    processBtn.addEventListener('click', () => {
+      if (!currentImage) return;
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = currentImage.width;
+      canvas.height = currentImage.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(currentImage, 0, 0);
+      
+      const format = formatSelect.value;
+      const ext = format.split('/')[1];
+      const quality = parseFloat(qualityInput.value);
+      
+      canvas.toBlob((blob) => {
+        document.getElementById('info').hidden = false;
+        document.getElementById('new-size').textContent = Common.formatBytes(blob.size);
+        
+        let ratio = ((origFile.size - blob.size) / origFile.size) * 100;
+        document.getElementById('reduction').textContent = ratio.toFixed(2) + '%';
+        
+        const outName = origFile.name.replace(/\.[^/.]+$/, "") + "-compressed." + (ext === 'jpeg' ? 'jpg' : ext);
+        Common.downloadBlob(blob, outName);
+      }, format, quality);
+    });
+  </script>
+</body>
+</html>

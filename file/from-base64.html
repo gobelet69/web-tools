@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Base64 to File - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Base64 to File</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>Base64 String</legend>
+      <textarea id="input-b64" rows="10" style="width:100%;" placeholder="Paste Base64 here..."></textarea>
+      <br>
+      <label>Filename (optional): <input type="text" id="fname" value="download"></label>
+      <br><br>
+      <button id="download-btn">Decode & Download</button>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('base64-to-file');
+    document.getElementById('download-btn').onclick = () => {
+      let b64 = document.getElementById('input-b64').value.trim();
+      if(!b64) return;
+      let mime = 'application/octet-stream';
+      if(b64.startsWith('data:')) {
+        const parts = b64.split(',');
+        mime = parts[0].split(':')[1].split(';')[0];
+        b64 = parts[1];
+      }
+      try {
+        const binStr = atob(b64);
+        const len = binStr.length;
+        const bytes = new Uint8Array(len);
+        for(let i=0; i<len; i++) bytes[i] = binStr.charCodeAt(i);
+        const blob = new Blob([bytes], {type: mime});
+        Common.downloadBlob(blob, document.getElementById('fname').value);
+      } catch(e) { alert('Invalid Base64 string'); }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "swissknifeweb",
+  "version": "1.0.0",
+  "description": "A collection of extremely fast, privacy-respecting, client-side tools built with native HTML5 and Vanilla JS.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "express": "^5.2.1",
+    "playwright": "^1.63.0"
+  }
+}

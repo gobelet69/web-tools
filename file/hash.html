@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Hash - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header>
+    <nav><a href="../index.html">← Back to Tools</a></nav>
+    <h1>File Hash</h1>
+    <button id="fav-btn">☆ Add to Favorites</button>
+    <p>Calculate SHA-256 or SHA-512 hashes of files.</p>
+    <p><em>Processed locally in your browser. Your files are not uploaded.</em></p>
+  </header>
+
+  <main>
+    <fieldset id="drop-zone" style="border: 2px dashed #ccc; padding: 1rem; margin-bottom: 1rem;">
+      <legend>Select File</legend>
+      <input type="file" id="file-input">
+      <p>Or drag & drop a file here</p>
+    </fieldset>
+
+    <fieldset id="info" hidden>
+      <legend>Result</legend>
+      <p>Filename: <strong id="fname"></strong></p>
+      <p>Size: <strong id="fsize"></strong></p>
+      <label>
+        Algorithm:
+        <select id="algo">
+          <option value="SHA-256">SHA-256</option>
+          <option value="SHA-512">SHA-512</option>
+          <option value="SHA-1">SHA-1 (Insecure)</option>
+        </select>
+      </label>
+      <br><br>
+      <label>Hash:</label>
+      <input type="text" id="hash-output" readonly style="width: 100%; font-family: monospace; font-size: 1.1rem;">
+    </fieldset>
+  </main>
+
+  <script>
+    'use strict';
+    Common.initTool('file-hash');
+
+    const algoSelect = document.getElementById('algo');
+    const hashOutput = document.getElementById('hash-output');
+    const infoSection = document.getElementById('info');
+    let currentFile = null;
+
+    async function computeHash(file, algo) {
+      hashOutput.value = 'Computing...';
+      try {
+        const buffer = await file.arrayBuffer();
+        const hashBuffer = await crypto.subtle.digest(algo, buffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        hashOutput.value = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      } catch (e) {
+        hashOutput.value = 'Error computing hash';
+      }
+    }
+
+    Common.setupDropZone('drop-zone', 'file-input', (file) => {
+      if (!file) return;
+      currentFile = file;
+      document.getElementById('fname').textContent = file.name;
+      document.getElementById('fsize').textContent = Common.formatBytes(file.size);
+      infoSection.hidden = false;
+      computeHash(file, algoSelect.value);
+    });
+
+    algoSelect.addEventListener('change', () => {
+      if (currentFile) {
+        computeHash(currentFile, algoSelect.value);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video to GIF - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+  <script src="../vendor/ffmpeg/ffmpeg.js"></script>
+  <script src="../vendor/ffmpeg/util.js"></script>
+  <script src="../js/ffmpeg-helper.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Video to GIF</h1><button id="fav-btn">☆ Add to Favorites</button>
+  <p><em>Warning: Processing GIF locally takes a lot of memory. Use short clips!</em></p></header>
+  <main>
+    <div id="unsupported" hidden style="color:red; font-weight:bold; margin-bottom:1rem;">Your browser/server does not support SharedArrayBuffer.</div>
+    <fieldset id="drop-zone"><legend>Select Video</legend><input type="file" id="file-input" accept="video/*"></fieldset>
+    <fieldset id="controls" disabled>
+      <legend>Options</legend>
+      <label>FPS: <input type="number" id="fps" value="10" min="1" max="30"></label>
+      <label>Scale Width: <input type="number" id="scale" value="320" min="100"></label>
+      <br><br><button id="process-btn">Generate GIF</button>
+      <p id="status" style="font-weight:bold; color:blue;"></p>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('video-to-gif');
+    if(typeof SharedArrayBuffer === 'undefined') document.getElementById('unsupported').hidden = false;
+    let file = null;
+    Common.setupDropZone('drop-zone', 'file-input', (f) => { file = f; document.getElementById('controls').disabled = false; });
+    document.getElementById('process-btn').onclick = async () => {
+      if(!file) return;
+      const status = document.getElementById('status'), btn = document.getElementById('process-btn');
+      const fps = document.getElementById('fps').value, scale = document.getElementById('scale').value;
+      try {
+        btn.disabled = true; status.textContent = 'Loading Engine...';
+        const ffmpeg = await FFmpegHelper.load((p) => { status.textContent = `Processing: ${Math.round(p * 100)}%`; });
+        await FFmpegHelper.write(file, 'input');
+        status.textContent = 'Converting...';
+        await ffmpeg.exec(['-i', 'input', '-vf', `fps=${fps},scale=${scale}:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse`, '-loop', '0', 'output.gif']);
+        const data = await FFmpegHelper.read('output.gif');
+        Common.downloadBlob(new Blob([data.buffer]), file.name.replace(/\.[^/.]+$/, "") + '.gif');
+        status.textContent = 'Done!';
+        await FFmpegHelper.cleanup(['input', 'output.gif']);
+      } catch(e) { status.textContent = 'Error: ' + e.message; } finally { btn.disabled = false; }
+    };
+  </script>
+</body>
+</html>

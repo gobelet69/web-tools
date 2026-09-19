@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URL to QR - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+  <script src="../vendor/qrious.min.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>URL to QR</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>Input URL</legend>
+      <input type="url" id="val" placeholder="https://example.com" style="width:100%; box-sizing:border-box; padding:0.5rem;">
+    </fieldset>
+    <fieldset style="text-align:center;">
+      <legend>QR Code</legend>
+      <canvas id="qr"></canvas>
+      <br><button id="dl-btn">Download PNG</button>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('qr-url');
+    const qr = new QRious({ element: document.getElementById('qr'), size: 250, value: '' });
+    document.getElementById('val').addEventListener('input', (e) => { qr.value = e.target.value; });
+    document.getElementById('dl-btn').onclick = () => {
+      if(!document.getElementById('val').value) return;
+      const link = document.createElement('a');
+      link.download = 'qr-url.png'; link.href = document.getElementById('qr').toDataURL(); link.click();
+    };
+  </script>
+</body>
+</html>

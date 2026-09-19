@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Passphrase Generator - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Passphrase Generator</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>Options</legend>
+      <label>Number of Words: <input type="number" id="wc" value="4" min="2" max="10"></label>
+      <label>Separator: <input type="text" id="sep" value="-" style="width:40px; text-align:center;"></label>
+      <button id="gen-btn">Generate</button>
+    </fieldset>
+    <fieldset>
+      <legend>Output</legend>
+      <input type="text" id="out" style="width:100%; box-sizing:border-box; font-size:1.5rem; text-align:center;" readonly>
+      <br><br><button id="copy-btn">Copy</button>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('passphrase-generator');
+    const wl = ["apple","banana","cherry","dog","elephant","frog","grape","house","igloo","jungle","kite","lion","monkey","nest","ocean","penguin","queen","rabbit","snake","tree","umbrella","violin","water","xylophone","yellow","zebra","actor","baker","candy","dance","eagle","flame","ghost","honey","island","juice","knight","lemon","magic","night","olive","pearl","river","storm","tiger","voice","wheel","yacht"];
+    document.getElementById('gen-btn').onclick = () => {
+      const wc = parseInt(document.getElementById('wc').value);
+      const sep = document.getElementById('sep').value;
+      const array = new Uint32Array(wc);
+      crypto.getRandomValues(array);
+      const phrase = Array.from(array).map(n => wl[n % wl.length]).join(sep);
+      document.getElementById('out').value = phrase;
+    };
+    document.getElementById('gen-btn').click();
+    document.getElementById('copy-btn').onclick = () => navigator.clipboard.writeText(document.getElementById('out').value);
+  </script>
+</body>
+</html>

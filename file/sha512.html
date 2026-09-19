@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File SHA-512 - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>File SHA-512</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset id="drop-zone"><legend>Select File</legend><input type="file" id="file-input"></fieldset>
+    <fieldset id="info" hidden>
+      <legend>Result</legend>
+      <p>Filename: <strong id="fname"></strong></p>
+      <p>Hash (SHA-512):</p>
+      <input type="text" id="hash-output" readonly style="width: 100%; font-family: monospace; font-size: 1.1rem;">
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('file-sha512');
+    Common.setupDropZone('drop-zone', 'file-input', async (file) => {
+      if (!file) return;
+      document.getElementById('fname').textContent = file.name;
+      document.getElementById('info').hidden = false;
+      document.getElementById('hash-output').value = 'Computing...';
+      try {
+        const buffer = await file.arrayBuffer();
+        const hashBuffer = await crypto.subtle.digest('SHA-512', buffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        document.getElementById('hash-output').value = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      } catch (e) { document.getElementById('hash-output').value = 'Error'; }
+    });
+  </script>
+</body>
+</html>

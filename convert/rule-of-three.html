@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rule of Three - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Rule of Three</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>Cross-Multiplication</legend>
+      <p>If A is to B, then C is to X.</p>
+      A: <input type="number" id="a" value="10"> --is to-- B: <input type="number" id="b" value="25"><br><br>
+      C: <input type="number" id="c" value="40"> --is to-- <strong>X = <span id="res" style="font-size:1.5rem; color:green;">100</span></strong>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('rule-of-three');
+    const a=document.getElementById('a'), b=document.getElementById('b'), c=document.getElementById('c'), res=document.getElementById('res');
+    function calc() {
+      const va=parseFloat(a.value), vb=parseFloat(b.value), vc=parseFloat(c.value);
+      if(!isNaN(va) && !isNaN(vb) && !isNaN(vc) && va!==0) res.textContent = (vb * vc) / va;
+    }
+    [a,b,c].forEach(el => el.addEventListener('input', calc));
+  </script>
+</body>
+</html>

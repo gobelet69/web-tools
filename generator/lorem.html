@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lorem Ipsum Generator - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Lorem Ipsum Generator</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>Options</legend>
+      <label>Paragraphs: <input type="number" id="p-count" value="3" min="1" max="50"></label>
+      <button id="gen-btn">Generate</button>
+    </fieldset>
+    <fieldset>
+      <legend>Output</legend>
+      <textarea id="output" rows="12" style="width: 100%; box-sizing: border-box;"></textarea>
+      <br><button id="copy-btn">Copy</button>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('lorem-ipsum');
+    const words = ["lorem","ipsum","dolor","sit","amet","consectetur","adipiscing","elit","sed","do","eiusmod","tempor","incididunt","ut","labore","et","dolore","magna","aliqua","enim","ad","minim","veniam","quis","nostrud","exercitation","ullamco","laboris","nisi","aliquip","ex","ea","commodo","consequat","duis","aute","irure","in","reprehenderit","voluptate","velit","esse","cillum","fugiat","nulla","pariatur","excepteur","sint","occaecat","cupidatat","non","proident","sunt","culpa","qui","officia","deserunt","mollit","anim","id","est","laborum"];
+    function genPara() {
+      const len = Math.floor(Math.random() * 40) + 20;
+      let p = [];
+      for(let i=0; i<len; i++) p.push(words[Math.floor(Math.random() * words.length)]);
+      p[0] = p[0].charAt(0).toUpperCase() + p[0].slice(1);
+      return p.join(' ') + '.';
+    }
+    document.getElementById('gen-btn').onclick = () => {
+      const count = parseInt(document.getElementById('p-count').value);
+      let res = [];
+      for(let i=0; i<count; i++) res.push(genPara());
+      document.getElementById('output').value = res.join('\n\n');
+    };
+    document.getElementById('gen-btn').click();
+    document.getElementById('copy-btn').onclick = () => navigator.clipboard.writeText(document.getElementById('output').value);
+  </script>
+</body>
+</html>

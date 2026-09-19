@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File to Base64 - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>File to Base64</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset id="drop-zone">
+      <legend>Select File</legend>
+      <input type="file" id="file-input">
+    </fieldset>
+    <fieldset id="info" hidden>
+      <legend>Base64 Output</legend>
+      <p>Data URI: <input type="checkbox" id="data-uri" checked> (Include mime type prefix)</p>
+      <textarea id="output" rows="10" style="width:100%;" readonly></textarea>
+      <br><button id="copy-btn">Copy Base64</button>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('file-to-base64');
+    let b64Raw = ''; let b64Uri = '';
+    Common.setupDropZone('drop-zone', 'file-input', (file) => {
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        b64Uri = e.target.result;
+        b64Raw = b64Uri.split(',')[1];
+        document.getElementById('info').hidden = false;
+        document.getElementById('output').value = document.getElementById('data-uri').checked ? b64Uri : b64Raw;
+      };
+      reader.readAsDataURL(file);
+    });
+    document.getElementById('data-uri').addEventListener('change', (e) => {
+      document.getElementById('output').value = e.target.checked ? b64Uri : b64Raw;
+    });
+    document.getElementById('copy-btn').onclick = async () => {
+      if(document.getElementById('output').value) await navigator.clipboard.writeText(document.getElementById('output').value);
+    };
+  </script>
+</body>
+</html>

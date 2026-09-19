@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAC Address Formatter - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>MAC Address Formatter</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>Input MAC Address</legend>
+      <input type="text" id="mac-in" value="00:1A:2B:3C:4D:5E" style="width:100%; font-family:monospace;">
+    </fieldset>
+    <fieldset>
+      <legend>Formats</legend>
+      <ul id="out" style="list-style:none; padding:0; font-family:monospace; font-size:1.2rem;"></ul>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('mac-formatter');
+    document.getElementById('mac-in').addEventListener('input', (e) => {
+      const clean = e.target.value.replace(/[^a-fA-F0-9]/g, '').toUpperCase();
+      const out = document.getElementById('out');
+      if(clean.length !== 12) { out.innerHTML = '<li style="color:red;">Invalid MAC length (must be 12 hex chars)</li>'; return; }
+      
+      const colon = clean.match(/.{1,2}/g).join(':');
+      const dash = clean.match(/.{1,2}/g).join('-');
+      const dot = clean.match(/.{1,4}/g).join('.');
+      
+      out.innerHTML = `
+        <li>${colon}</li>
+        <li>${dash}</li>
+        <li>${dot}</li>
+        <li>${clean}</li>
+        <li>${colon.toLowerCase()}</li>
+        <li>${dash.toLowerCase()}</li>
+        <li>${dot.toLowerCase()}</li>
+        <li>${clean.toLowerCase()}</li>
+      `;
+    });
+    document.getElementById('mac-in').dispatchEvent(new Event('input'));
+  </script>
+</body>
+</html>

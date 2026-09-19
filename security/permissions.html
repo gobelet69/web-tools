@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unix Permissions Calculator - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Unix Permissions</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>Select Permissions</legend>
+      <table style="width:100%; text-align:center;">
+        <tr><th></th><th>Read (4)</th><th>Write (2)</th><th>Execute (1)</th></tr>
+        <tr><td><strong>Owner</strong></td>
+            <td><input type="checkbox" id="or" checked></td>
+            <td><input type="checkbox" id="ow" checked></td>
+            <td><input type="checkbox" id="ox" checked></td></tr>
+        <tr><td><strong>Group</strong></td>
+            <td><input type="checkbox" id="gr" checked></td>
+            <td><input type="checkbox" id="gw"></td>
+            <td><input type="checkbox" id="gx" checked></td></tr>
+        <tr><td><strong>Public</strong></td>
+            <td><input type="checkbox" id="pr" checked></td>
+            <td><input type="checkbox" id="pw"></td>
+            <td><input type="checkbox" id="px" checked></td></tr>
+      </table>
+    </fieldset>
+    <fieldset>
+      <legend>Output</legend>
+      <p>Octal: <strong id="octal" style="font-size:1.5rem;">755</strong></p>
+      <p>Symbolic: <strong id="sym" style="font-size:1.5rem;">rwxr-xr-x</strong></p>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('unix-permissions');
+    const update = () => {
+      const getVal = (r,w,x) => (document.getElementById(r).checked?4:0) + (document.getElementById(w).checked?2:0) + (document.getElementById(x).checked?1:0);
+      const getSym = (r,w,x) => (document.getElementById(r).checked?'r':'-') + (document.getElementById(w).checked?'w':'-') + (document.getElementById(x).checked?'x':'-');
+      const o = getVal('or','ow','ox');
+      const g = getVal('gr','gw','gx');
+      const p = getVal('pr','pw','px');
+      document.getElementById('octal').textContent = `0${o}${g}${p}`;
+      document.getElementById('sym').textContent = `${getSym('or','ow','ox')}${getSym('gr','gw','gx')}${getSym('pr','pw','px')}`;
+    };
+    document.querySelectorAll('input[type="checkbox"]').forEach(el => el.addEventListener('change', update));
+    update();
+  </script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favicon Generator - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Favicon Generator</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset id="drop-zone"><legend>Select Image</legend><input type="file" id="file-input" accept="image/*"></fieldset>
+    <fieldset id="out" hidden>
+      <legend>Generated Sizes (PNG)</legend>
+      <div id="icons" style="display:flex; gap:2rem; align-items:flex-end;"></div>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('favicon-generator');
+    Common.setupDropZone('drop-zone', 'file-input', (file) => {
+      if(!file || !file.type.startsWith('image/')) return;
+      const img = new Image();
+      img.onload = () => {
+        document.getElementById('out').hidden = false;
+        const iconsDiv = document.getElementById('icons');
+        iconsDiv.innerHTML = '';
+        [16, 32, 64, 128, 256].forEach(size => {
+          const cvs = document.createElement('canvas');
+          cvs.width = size; cvs.height = size;
+          cvs.getContext('2d').drawImage(img, 0, 0, size, size);
+          
+          const wrap = document.createElement('div');
+          wrap.style.textAlign = 'center';
+          const i = new Image(); i.src = cvs.toDataURL('image/png');
+          i.style.border = '1px solid #ccc'; i.style.display = 'block'; i.style.marginBottom = '0.5rem';
+          const a = document.createElement('a');
+          a.href = i.src; a.download = `favicon-${size}x${size}.png`;
+          a.textContent = `${size}x${size}`;
+          wrap.appendChild(i); wrap.appendChild(a);
+          iconsDiv.appendChild(wrap);
+        });
+      };
+      img.src = URL.createObjectURL(file);
+    });
+  </script>
+</body>
+</html>

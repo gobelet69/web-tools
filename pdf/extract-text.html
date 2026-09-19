@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Extract Text - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+  <script src="../vendor/pdfjs/pdf.min.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>PDF Extract Text</h1><button id="fav-btn">☆ Add to Favorites</button>
+  <p><em>Extracts raw text data from PDF (no OCR).</em></p></header>
+  <main>
+    <fieldset id="drop-zone"><legend>Select PDF</legend><input type="file" id="file-input" accept="application/pdf"></fieldset>
+    <fieldset id="out" hidden>
+      <legend>Extracted Text</legend>
+      <p id="status" style="font-weight:bold;"></p>
+      <textarea id="res" rows="15" style="width:100%; box-sizing:border-box;" readonly></textarea>
+      <br><button id="copy-btn">Copy Text</button>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('pdf-extract-text');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '../vendor/pdfjs/pdf.worker.min.js';
+    
+    Common.setupDropZone('drop-zone', 'file-input', async (file) => {
+      if(!file || file.type !== 'application/pdf') return;
+      document.getElementById('out').hidden = false;
+      document.getElementById('status').textContent = 'Loading PDF...';
+      document.getElementById('res').value = '';
+      try {
+        const buf = await file.arrayBuffer();
+        const pdfDoc = await pdfjsLib.getDocument({ data: buf }).promise;
+        let fullText = '';
+        for (let i = 1; i <= pdfDoc.numPages; i++) {
+          document.getElementById('status').textContent = `Extracting page ${i}/${pdfDoc.numPages}...`;
+          const page = await pdfDoc.getPage(i);
+          const content = await page.getTextContent();
+          const strings = content.items.map(item => item.str);
+          fullText += `--- Page ${i} ---\n` + strings.join(' ') + '\n\n';
+        }
+        document.getElementById('res').value = fullText.trim() || 'No text found (might be a scanned image).';
+        document.getElementById('status').textContent = `Done! (${pdfDoc.numPages} pages)`;
+      } catch(e) { document.getElementById('status').textContent = 'Error: ' + e.message; }
+    });
+    document.getElementById('copy-btn').onclick = () => navigator.clipboard.writeText(document.getElementById('res').value);
+  </script>
+</body>
+</html>

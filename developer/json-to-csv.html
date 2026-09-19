@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON to CSV - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>JSON to CSV</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset><legend>Input JSON Array</legend><textarea id="input-text" rows="6" style="width: 100%; box-sizing: border-box;">[{"id":1,"name":"Alice"},{"id":2,"name":"Bob"}]</textarea></fieldset>
+    <fieldset><legend>Output CSV</legend><textarea id="output-text" rows="10" style="width: 100%; box-sizing: border-box;" readonly></textarea></fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('json-to-csv');
+    document.getElementById('input-text').addEventListener('input', (e) => {
+      try {
+        const data = JSON.parse(e.target.value);
+        if(!Array.isArray(data) || data.length === 0) throw new Error('Must be a non-empty array of objects');
+        const headers = Object.keys(data[0]);
+        let csv = headers.join(',') + '\n';
+        data.forEach(row => {
+          csv += headers.map(h => {
+            let val = row[h] === null ? '' : row[h].toString();
+            return val.includes(',') ? `"${val}"` : val;
+          }).join(',') + '\n';
+        });
+        document.getElementById('output-text').value = csv.trim();
+      } catch(err) {
+        document.getElementById('output-text').value = 'Error: ' + err.message;
+      }
+    });
+    document.getElementById('input-text').dispatchEvent(new Event('input'));
+  </script>
+</body>
+</html>

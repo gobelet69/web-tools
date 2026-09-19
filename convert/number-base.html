@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Number Base Converter - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Number Base Converter</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>Input</legend>
+      <input type="text" id="val" value="42" style="font-size:1.2rem;">
+      <select id="base-from">
+        <option value="10">Decimal (Base 10)</option>
+        <option value="2">Binary (Base 2)</option>
+        <option value="16">Hexadecimal (Base 16)</option>
+        <option value="8">Octal (Base 8)</option>
+      </select>
+    </fieldset>
+    <fieldset>
+      <legend>Conversions</legend>
+      <p>Decimal: <strong id="out-10"></strong></p>
+      <p>Binary: <strong id="out-2"></strong></p>
+      <p>Hex: <strong id="out-16"></strong></p>
+      <p>Octal: <strong id="out-8"></strong></p>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('number-base');
+    const val = document.getElementById('val');
+    const baseFrom = document.getElementById('base-from');
+    function update() {
+      const v = val.value.trim();
+      const b = parseInt(baseFrom.value);
+      if(!v) return;
+      const num = parseInt(v, b);
+      if(isNaN(num)) {
+        ['10','2','16','8'].forEach(id => document.getElementById('out-'+id).textContent = 'Invalid');
+        return;
+      }
+      document.getElementById('out-10').textContent = num.toString(10);
+      document.getElementById('out-2').textContent = num.toString(2);
+      document.getElementById('out-16').textContent = num.toString(16).toUpperCase();
+      document.getElementById('out-8').textContent = num.toString(8);
+    }
+    val.addEventListener('input', update);
+    baseFrom.addEventListener('change', update);
+    update();
+  </script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Crop - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header>
+    <nav><a href="../index.html">← Back to Tools</a></nav>
+    <h1>Image Crop</h1>
+    <button id="fav-btn">☆ Add to Favorites</button>
+    <p>Crop images to a specific area.</p>
+    <p><em>Processed locally in your browser. Your files are not uploaded.</em></p>
+  </header>
+
+  <main>
+    <fieldset id="drop-zone" style="border: 2px dashed #ccc; padding: 1rem; margin-bottom: 1rem;">
+      <legend>Select Image</legend>
+      <input type="file" id="file-input" accept="image/*">
+      <p>Or drag & drop an image here</p>
+    </fieldset>
+
+    <fieldset id="controls" disabled>
+      <legend>Crop Area</legend>
+      <label>X: <input type="number" id="x-input" min="0" value="0"></label>
+      <label>Y: <input type="number" id="y-input" min="0" value="0"></label>
+      <label>Width: <input type="number" id="w-input" min="1"></label>
+      <label>Height: <input type="number" id="h-input" min="1"></label>
+      <br><br>
+      <button id="process-btn">Crop & Download</button>
+    </fieldset>
+    
+    <!-- Using inline style purely for bounds of the preview area -->
+    <div style="overflow: auto; max-width: 100%; margin-top: 1rem;">
+      <canvas id="canvas" hidden></canvas>
+    </div>
+  </main>
+
+  <script>
+    'use strict';
+    Common.initTool('image-crop');
+
+    const xInput = document.getElementById('x-input');
+    const yInput = document.getElementById('y-input');
+    const wInput = document.getElementById('w-input');
+    const hInput = document.getElementById('h-input');
+    const processBtn = document.getElementById('process-btn');
+    const controls = document.getElementById('controls');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    let currentImage = null;
+    let origFile = null;
+
+    let isDragging = false;
+    let startX = 0, startY = 0;
+
+    function updateInputs(x, y, w, h) {
+      xInput.value = Math.max(0, x);
+      yInput.value = Math.max(0, y);
+      wInput.value = Math.min(w, currentImage.width - xInput.value);
+      hInput.value = Math.min(h, currentImage.height - yInput.value);
+      drawPreview();
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+      if (!currentImage) return;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      startX = (e.clientX - rect.left) * scaleX;
+      startY = (e.clientY - rect.top) * scaleY;
+      isDragging = true;
+      updateInputs(Math.floor(startX), Math.floor(startY), 1, 1);
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (!isDragging || !currentImage) return;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const curX = (e.clientX - rect.left) * scaleX;
+      const curY = (e.clientY - rect.top) * scaleY;
+      
+      const x = Math.floor(Math.min(startX, curX));
+      const y = Math.floor(Math.min(startY, curY));
+      const w = Math.floor(Math.abs(curX - startX));
+      const h = Math.floor(Math.abs(curY - startY));
+      
+      updateInputs(x, y, w, h);
+    });
+
+    canvas.addEventListener('mouseup', () => { isDragging = false; });
+    canvas.addEventListener('mouseleave', () => { isDragging = false; });
+
+    function drawPreview() {
+      if (!currentImage) return;
+      canvas.width = currentImage.width;
+      canvas.height = currentImage.height;
+      ctx.drawImage(currentImage, 0, 0);
+      
+      const x = parseInt(xInput.value) || 0;
+      const y = parseInt(yInput.value) || 0;
+      const w = parseInt(wInput.value) || currentImage.width;
+      const h = parseInt(hInput.value) || currentImage.height;
+
+      // Draw crop overlay
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      ctx.fillRect(0, 0, canvas.width, y); // Top
+      ctx.fillRect(0, y + h, canvas.width, canvas.height - (y + h)); // Bottom
+      ctx.fillRect(0, y, x, h); // Left
+      ctx.fillRect(x + w, y, canvas.width - (x + w), h); // Right
+      
+      ctx.strokeStyle = 'red';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, w, h);
+    }
+
+    Common.setupDropZone('drop-zone', 'file-input', (file) => {
+      if (!file || !file.type.startsWith('image/')) return;
+      origFile = file;
+      
+      const img = new Image();
+      img.onload = () => {
+        currentImage = img;
+        controls.disabled = false;
+        canvas.hidden = false;
+        
+        xInput.value = 0;
+        yInput.value = 0;
+        wInput.value = img.width;
+        hInput.max = img.height;
+        wInput.max = img.width;
+        hInput.value = img.height;
+        
+        drawPreview();
+        URL.revokeObjectURL(img.src);
+      };
+      img.src = URL.createObjectURL(file);
+    });
+
+    [xInput, yInput, wInput, hInput].forEach(el => el.addEventListener('input', drawPreview));
+
+    processBtn.addEventListener('click', () => {
+      if (!currentImage) return;
+      
+      const x = parseInt(xInput.value) || 0;
+      const y = parseInt(yInput.value) || 0;
+      const w = parseInt(wInput.value) || currentImage.width;
+      const h = parseInt(hInput.value) || currentImage.height;
+      
+      const outCanvas = document.createElement('canvas');
+      outCanvas.width = w;
+      outCanvas.height = h;
+      outCanvas.getContext('2d').drawImage(currentImage, x, y, w, h, 0, 0, w, h);
+      
+      outCanvas.toBlob((blob) => {
+        Common.downloadBlob(blob, `cropped-${origFile.name}`);
+      }, origFile.type);
+    });
+  </script>
+</body>
+</html>

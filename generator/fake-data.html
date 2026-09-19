@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fake Data Generator - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Fake Data Generator</h1><button id="fav-btn">☆ Add to Favorites</button>
+  <p><em>Generate strictly fictitious data for development.</em></p></header>
+  <main>
+    <fieldset>
+      <legend>Format</legend>
+      <label>Count: <input type="number" id="count" value="10" min="1" max="1000"></label>
+      <label>Format: 
+        <select id="format"><option value="json">JSON Array</option><option value="csv">CSV</option></select>
+      </label>
+      <button id="gen-btn">Generate</button>
+    </fieldset>
+    <fieldset>
+      <legend>Output</legend>
+      <textarea id="output" rows="15" style="width: 100%; box-sizing: border-box; font-family: monospace;"></textarea>
+      <br><button id="copy-btn">Copy</button>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('fake-data');
+    const first = ["John","Jane","Alex","Emma","Liam","Olivia","Noah","Sophia","William","Isabella","James","Mia"];
+    const last = ["Smith","Johnson","Williams","Brown","Jones","Garcia","Miller","Davis","Rodriguez","Martinez"];
+    const domains = ["example.com","test.net","demo.org","mock.local"];
+    
+    document.getElementById('gen-btn').onclick = () => {
+      const count = parseInt(document.getElementById('count').value);
+      const isJson = document.getElementById('format').value === 'json';
+      let data = [];
+      for(let i=1; i<=count; i++) {
+        const f = first[Math.floor(Math.random()*first.length)];
+        const l = last[Math.floor(Math.random()*last.length)];
+        const d = domains[Math.floor(Math.random()*domains.length)];
+        data.push({ id: i, first_name: f, last_name: l, email: `${f.toLowerCase()}.${l.toLowerCase()}@${d}`, age: Math.floor(Math.random()*60)+18, registered: new Date(Date.now() - Math.random()*10000000000).toISOString().split('T')[0] });
+      }
+      if(isJson) {
+        document.getElementById('output').value = JSON.stringify(data, null, 2);
+      } else {
+        const header = "id,first_name,last_name,email,age,registered\n";
+        const rows = data.map(r => `${r.id},${r.first_name},${r.last_name},${r.email},${r.age},${r.registered}`).join('\n');
+        document.getElementById('output').value = header + rows;
+      }
+    };
+    document.getElementById('gen-btn').click();
+    document.getElementById('copy-btn').onclick = () => navigator.clipboard.writeText(document.getElementById('output').value);
+  </script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON Validator - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header>
+    <nav><a href="../index.html">← Back to Tools</a></nav>
+    <h1>JSON Validator</h1>
+    <button id="fav-btn">☆ Add to Favorites</button>
+    <p>Validate JSON syntax instantly.</p>
+    <p><em>Processed locally in your browser.</em></p>
+  </header>
+
+  <main>
+    <fieldset>
+      <legend>Input JSON</legend>
+      <textarea id="input-text" rows="12" style="width: 100%; box-sizing: border-box; font-family: monospace;" placeholder="Paste JSON here..."></textarea>
+    </fieldset>
+
+    <fieldset>
+      <legend>Validation Status</legend>
+      <output id="status" style="font-size: 1.2rem; font-weight: bold;">Ready</output>
+      <pre id="error-details" style="color: red;"></pre>
+    </fieldset>
+  </main>
+
+  <script>
+    'use strict';
+    Common.initTool('json-validator');
+
+    const input = document.getElementById('input-text');
+    const status = document.getElementById('status');
+    const errorDetails = document.getElementById('error-details');
+
+    input.addEventListener('input', () => {
+      const text = input.value.trim();
+      if (!text) {
+        status.textContent = 'Ready';
+        status.style.color = 'black';
+        errorDetails.textContent = '';
+        return;
+      }
+      
+      try {
+        JSON.parse(text);
+        status.textContent = '✅ Valid JSON';
+        status.style.color = 'green';
+        errorDetails.textContent = '';
+      } catch (e) {
+        status.textContent = '❌ Invalid JSON';
+        status.style.color = 'red';
+        errorDetails.textContent = e.message;
+      }
+    });
+  </script>
+</body>
+</html>

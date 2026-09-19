@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Trim - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+  <script src="../vendor/ffmpeg/ffmpeg.js"></script>
+  <script src="../vendor/ffmpeg/util.js"></script>
+  <script src="../js/ffmpeg-helper.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Audio Trim</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <div id="unsupported" hidden style="color:red; font-weight:bold; margin-bottom:1rem;">Your browser/server does not support SharedArrayBuffer. Processing will fail.</div>
+    <fieldset id="drop-zone"><legend>Select Audio</legend><input type="file" id="file-input" accept="audio/*,video/*"></fieldset>
+    <fieldset id="controls" disabled>
+      <legend>Options</legend>
+      <label>Start Time (HH:MM:SS or Seconds): <input type="text" id="start" value="00:00:00"></label><br>
+      <label>End Time (HH:MM:SS or Seconds): <input type="text" id="end" value="00:00:10"></label>
+      <br><br><button id="process-btn">Trim</button>
+      <p id="status" style="font-weight:bold; color:blue;"></p>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('audio-trim');
+    if(typeof SharedArrayBuffer === 'undefined') document.getElementById('unsupported').hidden = false;
+    let file = null;
+    Common.setupDropZone('drop-zone', 'file-input', (f) => { file = f; document.getElementById('controls').disabled = false; });
+    document.getElementById('process-btn').onclick = async () => {
+      if(!file) return;
+      const status = document.getElementById('status'), btn = document.getElementById('process-btn');
+      const start = document.getElementById('start').value, end = document.getElementById('end').value;
+      const ext = file.name.split('.').pop() || 'mp3';
+      try {
+        btn.disabled = true; status.textContent = 'Loading Engine...';
+        const ffmpeg = await FFmpegHelper.load((p) => { status.textContent = `Processing: ${Math.round(p * 100)}%`; });
+        await FFmpegHelper.write(file, 'input');
+        status.textContent = 'Trimming...';
+        await ffmpeg.exec(['-i', 'input', '-ss', start, '-to', end, '-c', 'copy', 'output.' + ext]);
+        const data = await FFmpegHelper.read('output.' + ext);
+        Common.downloadBlob(new Blob([data.buffer]), file.name.replace(/\.[^/.]+$/, "") + '-trimmed.' + ext);
+        status.textContent = 'Done!';
+        await FFmpegHelper.cleanup(['input', 'output.' + ext]);
+      } catch(e) { status.textContent = 'Error: ' + e.message; } finally { btn.disabled = false; }
+    };
+  </script>
+</body>
+</html>

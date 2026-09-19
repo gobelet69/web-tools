@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Inspector - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>File Inspector</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset id="drop-zone"><legend>Select File</legend><input type="file" id="file-input"></fieldset>
+    <fieldset id="info" hidden>
+      <legend>Hex & ASCII Viewer</legend>
+      <p>Filename: <strong id="fname"></strong> (<span id="fsize"></span>)</p>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <button id="prev-btn" disabled>← Previous 512 bytes</button>
+        <span id="offset-label">Offset: 0</span>
+        <button id="next-btn" disabled>Next 512 bytes →</button>
+      </div>
+      <pre id="hex-out" style="background:#f4f4f4; padding:1rem; overflow-x:auto; font-size:0.9rem; line-height:1.2;"></pre>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('file-inspector');
+    let currentFile = null;
+    let offset = 0;
+    const chunkSize = 512;
+    
+    function readChunk() {
+      if(!currentFile) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const bytes = new Uint8Array(e.target.result);
+        let hexStr = '', asciiStr = '';
+        for(let i=0; i<bytes.length; i++) {
+          if(i % 16 === 0) hexStr += (offset + i).toString(16).padStart(8, '0').toUpperCase() + '  ';
+          hexStr += bytes[i].toString(16).padStart(2, '0').toUpperCase() + ' ';
+          asciiStr += (bytes[i] >= 32 && bytes[i] <= 126) ? String.fromCharCode(bytes[i]) : '.';
+          if(i % 16 === 15 || i === bytes.length - 1) {
+            if(i % 16 !== 15) hexStr += '   '.repeat(15 - (i % 16));
+            hexStr += ' | ' + asciiStr + '\n';
+            asciiStr = '';
+          }
+        }
+        document.getElementById('hex-out').textContent = hexStr;
+        document.getElementById('offset-label').textContent = `Offset: ${offset} / ${currentFile.size}`;
+        document.getElementById('prev-btn').disabled = offset === 0;
+        document.getElementById('next-btn').disabled = offset + chunkSize >= currentFile.size;
+      };
+      reader.readAsArrayBuffer(currentFile.slice(offset, offset + chunkSize));
+    }
+    
+    Common.setupDropZone('drop-zone', 'file-input', (file) => {
+      if(!file) return;
+      currentFile = file;
+      offset = 0;
+      document.getElementById('fname').textContent = file.name;
+      document.getElementById('fsize').textContent = Common.formatBytes(file.size);
+      document.getElementById('info').hidden = false;
+      readChunk();
+    });
+    
+    document.getElementById('prev-btn').onclick = () => { offset = Math.max(0, offset - chunkSize); readChunk(); };
+    document.getElementById('next-btn').onclick = () => { if(offset + chunkSize < currentFile.size) { offset += chunkSize; readChunk(); } };
+  </script>
+</body>
+</html>

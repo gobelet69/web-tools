@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Reader - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>QR Reader</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset id="drop-zone">
+      <legend>Select QR Image</legend>
+      <input type="file" id="file-input" accept="image/*">
+    </fieldset>
+    <fieldset id="out" hidden>
+      <legend>Decoded Content</legend>
+      <textarea id="res" rows="5" style="width:100%; box-sizing:border-box; font-size:1.2rem; padding:1rem;" readonly></textarea>
+      <br><button id="copy-btn">Copy</button>
+    </fieldset>
+    <div id="unsupported" style="color:red; font-weight:bold;" hidden>Your browser does not support the native BarcodeDetector API.</div>
+  </main>
+  <script>
+    'use strict'; Common.initTool('qr-reader');
+    if (!('BarcodeDetector' in window)) {
+      document.getElementById('unsupported').hidden = false;
+      document.getElementById('drop-zone').disabled = true;
+    } else {
+      const detector = new BarcodeDetector({ formats: ['qr_code'] });
+      Common.setupDropZone('drop-zone', 'file-input', async (file) => {
+        if(!file || !file.type.startsWith('image/')) return;
+        const img = new Image();
+        img.onload = async () => {
+          try {
+            const barcodes = await detector.detect(img);
+            document.getElementById('out').hidden = false;
+            if(barcodes.length > 0) {
+              document.getElementById('res').value = barcodes.map(b => b.rawValue).join('\n---\n');
+            } else {
+              document.getElementById('res').value = 'No QR code found in this image.';
+            }
+          } catch(e) { document.getElementById('res').value = 'Error reading QR: ' + e.message; }
+        };
+        img.src = URL.createObjectURL(file);
+      });
+      document.getElementById('copy-btn').onclick = () => navigator.clipboard.writeText(document.getElementById('res').value);
+    }
+  </script>
+</body>
+</html>

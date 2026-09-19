@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV Viewer - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+  <style>
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
+    th { background: #eee; }
+  </style>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>CSV Viewer</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset><legend>Input CSV</legend><textarea id="input-text" rows="6" style="width: 100%; box-sizing: border-box;"></textarea></fieldset>
+    <fieldset style="overflow:auto;"><legend>Data Table</legend><table id="out"></table></fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('csv-viewer');
+    function parseCSV(str) { return str.split('\n').filter(l=>l.trim()).map(l => l.split(',').map(c => c.trim())); }
+    document.getElementById('input-text').addEventListener('input', (e) => {
+      const data = parseCSV(e.target.value);
+      const out = document.getElementById('out');
+      out.innerHTML = '';
+      if(data.length === 0) return;
+      let html = '<thead><tr>' + data[0].map(c => `<th>${Common.escapeHtml(c)}</th>`).join('') + '</tr></thead><tbody>';
+      for(let i=1; i<data.length; i++) html += '<tr>' + data[i].map(c => `<td>${Common.escapeHtml(c)}</td>`).join('') + '</tr>';
+      out.innerHTML = html + '</tbody>';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Byte Size Converter - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Byte Size Converter</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>Input Bytes</legend>
+      <input type="number" id="bytes" value="1048576" style="width: 100%; font-size: 1.5rem;">
+    </fieldset>
+    <fieldset>
+      <legend>Conversions (Base 1024)</legend>
+      <p>Bytes: <strong id="b"></strong></p>
+      <p>Kilobytes (KB): <strong id="kb"></strong></p>
+      <p>Megabytes (MB): <strong id="mb"></strong></p>
+      <p>Gigabytes (GB): <strong id="gb"></strong></p>
+      <p>Terabytes (TB): <strong id="tb"></strong></p>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('byte-converter');
+    document.getElementById('bytes').addEventListener('input', (e) => {
+      const v = parseFloat(e.target.value);
+      if(isNaN(v)) return;
+      document.getElementById('b').textContent = v;
+      document.getElementById('kb').textContent = v / 1024;
+      document.getElementById('mb').textContent = v / (1024**2);
+      document.getElementById('gb').textContent = v / (1024**3);
+      document.getElementById('tb').textContent = v / (1024**4);
+    });
+    document.getElementById('bytes').dispatchEvent(new Event('input'));
+  </script>
+</body>
+</html>

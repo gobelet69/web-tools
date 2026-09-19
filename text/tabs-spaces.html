@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tabs to Spaces - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Tabs ↔ Spaces</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset><legend>Input Text</legend><textarea id="input-text" rows="8" style="width: 100%; box-sizing: border-box;"></textarea></fieldset>
+    <button id="t2s-btn">Tabs to Spaces (4)</button> <button id="s2t-btn">Spaces (4) to Tabs</button>
+    <fieldset><legend>Output Text</legend><textarea id="output-text" rows="8" style="width: 100%; box-sizing: border-box;" readonly></textarea></fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('tabs-spaces');
+    const input = document.getElementById('input-text');
+    const output = document.getElementById('output-text');
+    document.getElementById('t2s-btn').onclick = () => output.value = input.value.replace(/\t/g, '    ');
+    document.getElementById('s2t-btn').onclick = () => output.value = input.value.replace(/ {4}/g, '\t');
+  </script>
+</body>
+</html>

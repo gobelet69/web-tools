@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diff Checker - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+  <style>
+    .del { background: #ffebee; color: #c62828; }
+    .add { background: #e8f5e9; color: #2e7d32; }
+    .diff-table { width: 100%; border-collapse: collapse; font-family: monospace; font-size: 0.9rem; }
+    .diff-table td { border-bottom: 1px solid #eee; padding: 2px 5px; white-space: pre-wrap; }
+    .line-num { color: #999; width: 40px; text-align: right; user-select: none; }
+  </style>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Diff Checker</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <div style="display:flex; gap:1rem;">
+      <fieldset style="flex:1;">
+        <legend>Original Text</legend>
+        <textarea id="orig" rows="10" style="width:100%; box-sizing:border-box;">Hello World!
+This is a simple text.
+Line 3.</textarea>
+      </fieldset>
+      <fieldset style="flex:1;">
+        <legend>Changed Text</legend>
+        <textarea id="changed" rows="10" style="width:100%; box-sizing:border-box;">Hello Universe!
+This is a simple text.
+Line 3.
+Line 4.</textarea>
+      </fieldset>
+    </div>
+    <fieldset>
+      <legend>Line-by-Line Difference</legend>
+      <table class="diff-table" id="out"></table>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('diff-checker');
+    const update = () => {
+      const t1 = document.getElementById('orig').value.split('\n');
+      const t2 = document.getElementById('changed').value.split('\n');
+      const out = document.getElementById('out');
+      out.innerHTML = '';
+      
+      const max = Math.max(t1.length, t2.length);
+      for(let i=0; i<max; i++) {
+        if(t1[i] !== t2[i]) {
+          if(t1[i] !== undefined) out.innerHTML += `<tr><td class="line-num">${i+1}</td><td class="del">- ${Common.escapeHtml(t1[i])}</td></tr>`;
+          if(t2[i] !== undefined) out.innerHTML += `<tr><td class="line-num">${i+1}</td><td class="add">+ ${Common.escapeHtml(t2[i])}</td></tr>`;
+        } else {
+          out.innerHTML += `<tr><td class="line-num">${i+1}</td><td>  ${Common.escapeHtml(t1[i])}</td></tr>`;
+        }
+      }
+    };
+    document.getElementById('orig').addEventListener('input', update);
+    document.getElementById('changed').addEventListener('input', update);
+    update();
+  </script>
+</body>
+</html>

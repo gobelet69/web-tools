@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Extract Frame - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Extract Frame</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset id="drop-zone"><legend>Select Video</legend><input type="file" id="file-input" accept="video/*"></fieldset>
+    <fieldset id="controls" hidden>
+      <legend>Preview</legend>
+      <video id="vid" controls style="max-width:100%; max-height:400px; display:block; margin:0 auto;"></video>
+      <div style="text-align:center; margin-top:1rem;">
+        <button id="capture-btn" style="padding:0.5rem 1rem; font-size:1.1rem; font-weight:bold;">Capture Current Frame</button>
+      </div>
+    </fieldset>
+    <fieldset id="out" hidden>
+      <legend>Snapshot</legend>
+      <img id="preview" style="max-width:100%; border:1px solid #ccc; display:block; margin:0 auto 1rem;">
+      <div style="text-align:center;"><button id="dl-btn">Download Image</button></div>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('video-frame');
+    let file = null, currentBlob = null;
+    const vid = document.getElementById('vid');
+    Common.setupDropZone('drop-zone', 'file-input', (f) => {
+      file = f;
+      document.getElementById('controls').hidden = false;
+      vid.src = URL.createObjectURL(file);
+    });
+    document.getElementById('capture-btn').onclick = () => {
+      const cvs = document.createElement('canvas');
+      cvs.width = vid.videoWidth; cvs.height = vid.videoHeight;
+      cvs.getContext('2d').drawImage(vid, 0, 0, cvs.width, cvs.height);
+      cvs.toBlob(blob => {
+        currentBlob = blob;
+        document.getElementById('out').hidden = false;
+        document.getElementById('preview').src = URL.createObjectURL(blob);
+      });
+    };
+    document.getElementById('dl-btn').onclick = () => {
+      if(currentBlob) Common.downloadBlob(currentBlob, `frame-${vid.currentTime.toFixed(2)}s.png`);
+    };
+  </script>
+</body>
+</html>

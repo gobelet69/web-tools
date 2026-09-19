@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unicode Inspector - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+  <style>
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-family: monospace; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: center; }
+    th { background: #eee; }
+  </style>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Unicode Inspector</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset><legend>Input Text</legend><textarea id="input-text" rows="3" style="width: 100%; box-sizing: border-box;">Hello 👋</textarea></fieldset>
+    <fieldset style="overflow:auto;"><legend>Code Points</legend><table id="out"></table></fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('unicode-inspector');
+    document.getElementById('input-text').addEventListener('input', (e) => {
+      const out = document.getElementById('out');
+      out.innerHTML = '<tr><th>Char</th><th>Code Point (Decimal)</th><th>Hex (U+xxxx)</th></tr>';
+      const text = e.target.value;
+      for (const char of text) {
+        const cp = char.codePointAt(0);
+        out.innerHTML += `<tr><td style="font-size:1.5rem;">${Common.escapeHtml(char)}</td><td>${cp}</td><td>U+${cp.toString(16).toUpperCase().padStart(4, '0')}</td></tr>`;
+      }
+    });
+    document.getElementById('input-text').dispatchEvent(new Event('input'));
+  </script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UUID Generator - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header>
+    <nav><a href="../index.html">← Back to Tools</a></nav>
+    <h1>UUID Generator</h1>
+    <button id="fav-btn">☆ Add to Favorites</button>
+    <p>Generate random UUIDs (v4).</p>
+    <p><em>Processed locally in your browser using crypto.randomUUID().</em></p>
+  </header>
+
+  <main>
+    <fieldset>
+      <legend>Options</legend>
+      <label>
+        Quantity:
+        <input type="number" id="qty" min="1" max="1000" value="1">
+      </label>
+      <button id="generate-btn">Generate</button>
+    </fieldset>
+
+    <fieldset>
+      <legend>Output</legend>
+      <textarea id="output" rows="15" style="width: 100%; box-sizing: border-box; font-family: monospace;" readonly></textarea>
+      <br>
+      <button id="copy-btn">Copy All</button>
+    </fieldset>
+  </main>
+
+  <script>
+    'use strict';
+    Common.initTool('uuid-generator');
+
+    const qtyInput = document.getElementById('qty');
+    const generateBtn = document.getElementById('generate-btn');
+    const output = document.getElementById('output');
+    const copyBtn = document.getElementById('copy-btn');
+
+    function generate() {
+      const qty = parseInt(qtyInput.value) || 1;
+      const count = Math.min(Math.max(qty, 1), 1000);
+      const uuids = [];
+      for (let i = 0; i < count; i++) {
+        uuids.push(crypto.randomUUID());
+      }
+      output.value = uuids.join('\n');
+    }
+
+    generateBtn.addEventListener('click', generate);
+    
+    // Generate one on load
+    generate();
+
+    copyBtn.addEventListener('click', async () => {
+      if (output.value) {
+        await navigator.clipboard.writeText(output.value);
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => copyBtn.textContent = originalText, 1500);
+      }
+    });
+  </script>
+</body>
+</html>

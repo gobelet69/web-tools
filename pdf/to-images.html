@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF to Images - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+  <script src="../vendor/pdfjs/pdf.min.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>PDF to Images</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset id="drop-zone"><legend>Select PDF</legend><input type="file" id="file-input" accept="application/pdf"></fieldset>
+    <fieldset id="controls" disabled>
+      <legend>Export Options</legend>
+      <label>Format: <select id="format"><option value="image/png">PNG</option><option value="image/jpeg">JPEG</option></select></label>
+      <label style="margin-left:1rem;">Scale/Quality (Multiplier): <input type="number" id="scale" value="1.5" min="0.5" max="4" step="0.5" style="width:60px;"></label>
+      <br><br><button id="process-btn">Extract All Pages</button> <span id="status"></span>
+    </fieldset>
+    <fieldset id="out" hidden>
+      <legend>Extracted Pages</legend>
+      <div id="gallery" style="display:flex; flex-wrap:wrap; gap:1rem;"></div>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('pdf-to-images');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '../vendor/pdfjs/pdf.worker.min.js';
+    let pdfDoc = null, origFile = null;
+    
+    Common.setupDropZone('drop-zone', 'file-input', async (file) => {
+      if(!file || file.type !== 'application/pdf') return;
+      origFile = file;
+      document.getElementById('status').textContent = 'Loading PDF...';
+      const buf = await file.arrayBuffer();
+      pdfDoc = await pdfjsLib.getDocument({ data: buf }).promise;
+      document.getElementById('controls').disabled = false;
+      document.getElementById('status').textContent = `Loaded ${pdfDoc.numPages} pages.`;
+    });
+
+    document.getElementById('process-btn').onclick = async () => {
+      if(!pdfDoc) return;
+      const format = document.getElementById('format').value;
+      const ext = format.split('/')[1];
+      const scale = parseFloat(document.getElementById('scale').value) || 1.5;
+      const gallery = document.getElementById('gallery');
+      gallery.innerHTML = '';
+      document.getElementById('out').hidden = false;
+      document.getElementById('process-btn').disabled = true;
+
+      for (let i = 1; i <= pdfDoc.numPages; i++) {
+        document.getElementById('status').textContent = `Rendering page ${i}/${pdfDoc.numPages}...`;
+        const page = await pdfDoc.getPage(i);
+        const viewport = page.getViewport({ scale });
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = viewport.width; canvas.height = viewport.height;
+        await page.render({ canvasContext: ctx, viewport }).promise;
+        
+        canvas.toBlob((blob) => {
+          const url = URL.createObjectURL(blob);
+          const div = document.createElement('div');
+          div.style = "text-align:center; border:1px solid #ccc; padding:0.5rem; border-radius:4px;";
+          const img = document.createElement('img');
+          img.src = url; img.style = "max-width:200px; display:block; margin-bottom:0.5rem;";
+          const btn = document.createElement('button');
+          btn.textContent = `Download P.${i}`;
+          btn.onclick = () => { Common.downloadBlob(blob, `${origFile.name.replace('.pdf','')}-page${i}.${ext}`); };
+          div.appendChild(img); div.appendChild(btn);
+          gallery.appendChild(div);
+        }, format);
+      }
+      document.getElementById('status').textContent = 'Done!';
+      document.getElementById('process-btn').disabled = false;
+    };
+  </script>
+</body>
+</html>

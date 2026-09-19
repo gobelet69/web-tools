@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Metadata Remover - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Image Metadata Remover</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset id="drop-zone">
+      <legend>Select Image</legend>
+      <input type="file" id="file-input" accept="image/jpeg, image/png, image/webp">
+      <p>Removes EXIF, GPS location, and other embedded metadata.</p>
+    </fieldset>
+    <fieldset id="out" hidden>
+      <legend>Result</legend>
+      <p style="color:green; font-weight:bold;">Metadata stripped successfully!</p>
+      <p>Original: <span id="s-orig"></span></p>
+      <p>Cleaned: <span id="s-clean"></span></p>
+      <button id="dl-btn">Download Clean Image</button>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('metadata-remover');
+    Common.setupDropZone('drop-zone', 'file-input', (file) => {
+      if(!file || !file.type.startsWith('image/')) return;
+      document.getElementById('s-orig').textContent = Common.formatBytes(file.size);
+      
+      const img = new Image();
+      img.onload = () => {
+        const cvs = document.createElement('canvas');
+        cvs.width = img.width; cvs.height = img.height;
+        cvs.getContext('2d').drawImage(img, 0, 0);
+        
+        // Re-encoding via canvas natively strips all EXIF/metadata
+        cvs.toBlob((blob) => {
+          document.getElementById('out').hidden = false;
+          document.getElementById('s-clean').textContent = Common.formatBytes(blob.size);
+          document.getElementById('dl-btn').onclick = () => Common.downloadBlob(blob, `clean-${file.name}`);
+        }, file.type);
+      };
+      img.src = URL.createObjectURL(file);
+    });
+  </script>
+</body>
+</html>

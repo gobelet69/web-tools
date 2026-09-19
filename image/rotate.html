@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Rotate & Flip - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Image Rotate & Flip</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset id="drop-zone"><legend>Select Image</legend><input type="file" id="file-input" accept="image/*"></fieldset>
+    <fieldset id="controls" disabled>
+      <legend>Transformations</legend>
+      <button id="rot-left">↺ Rotate Left (-90°)</button>
+      <button id="rot-right">↻ Rotate Right (+90°)</button>
+      <button id="flip-h">↔ Flip Horizontal</button>
+      <button id="flip-v">↕ Flip Vertical</button>
+      <br><br><button id="save-btn" style="font-weight:bold;">Download Result</button>
+    </fieldset>
+    <div style="overflow:auto; max-width:100%;"><canvas id="canvas" hidden></canvas></div>
+  </main>
+  <script>
+    'use strict'; Common.initTool('image-rotate');
+    let img = null, origFile = null, angle = 0, scaleX = 1, scaleY = 1;
+    const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
+    
+    Common.setupDropZone('drop-zone', 'file-input', (file) => {
+      if(!file || !file.type.startsWith('image/')) return;
+      origFile = file;
+      const i = new Image();
+      i.onload = () => { img = i; angle = 0; scaleX = 1; scaleY = 1; draw(); document.getElementById('controls').disabled = false; canvas.hidden = false; };
+      i.src = URL.createObjectURL(file);
+    });
+
+    function draw() {
+      if(!img) return;
+      const rad = angle * Math.PI / 180;
+      const absCos = Math.abs(Math.cos(rad)), absSin = Math.abs(Math.sin(rad));
+      canvas.width = img.width * absCos + img.height * absSin;
+      canvas.height = img.width * absSin + img.height * absCos;
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.save();
+      ctx.translate(canvas.width/2, canvas.height/2);
+      ctx.rotate(rad);
+      ctx.scale(scaleX, scaleY);
+      ctx.drawImage(img, -img.width/2, -img.height/2);
+      ctx.restore();
+    }
+    
+    document.getElementById('rot-left').onclick = () => { angle -= 90; draw(); };
+    document.getElementById('rot-right').onclick = () => { angle += 90; draw(); };
+    document.getElementById('flip-h').onclick = () => { scaleX *= -1; draw(); };
+    document.getElementById('flip-v').onclick = () => { scaleY *= -1; draw(); };
+    
+    document.getElementById('save-btn').onclick = () => {
+      if(!img) return;
+      canvas.toBlob((b) => Common.downloadBlob(b, `rotated-${origFile.name}`), origFile.type);
+    };
+  </script>
+</body>
+</html>

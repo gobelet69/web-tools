@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phone to QR - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+  <script src="../vendor/qrious.min.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Phone to QR</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>Phone Number</legend>
+      <input type="tel" id="val" placeholder="+1234567890" style="width:100%; box-sizing:border-box; padding:0.5rem;">
+    </fieldset>
+    <fieldset style="text-align:center;">
+      <legend>QR Code</legend>
+      <canvas id="qr"></canvas>
+      <br><button id="dl-btn">Download PNG</button>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('qr-phone');
+    const qr = new QRious({ element: document.getElementById('qr'), size: 250, value: '' });
+    document.getElementById('val').addEventListener('input', (e) => {
+      const v = e.target.value.replace(/[^0-9+]/g, '');
+      qr.value = v ? `tel:${v}` : ''; 
+    });
+    document.getElementById('dl-btn').onclick = () => {
+      if(!document.getElementById('val').value) return;
+      const link = document.createElement('a');
+      link.download = 'qr-phone.png'; link.href = document.getElementById('qr').toDataURL(); link.click();
+    };
+  </script>
+</body>
+</html>

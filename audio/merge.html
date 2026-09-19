@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Merge - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+  <script src="../vendor/ffmpeg/ffmpeg.js"></script>
+  <script src="../vendor/ffmpeg/util.js"></script>
+  <script src="../js/ffmpeg-helper.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Audio Merge</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <div id="unsupported" hidden style="color:red; font-weight:bold; margin-bottom:1rem;">Your browser/server does not support SharedArrayBuffer. Processing will fail.</div>
+    <fieldset id="drop-zone"><legend>Select Audio Files</legend><input type="file" id="file-input" accept="audio/*" multiple></fieldset>
+    <fieldset id="controls" disabled>
+      <legend>Selected Files</legend>
+      <ul id="list"></ul>
+      <button id="process-btn">Merge</button>
+      <p id="status" style="font-weight:bold; color:blue;"></p>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('audio-merge');
+    if(typeof SharedArrayBuffer === 'undefined') document.getElementById('unsupported').hidden = false;
+    let files = [];
+    Common.setupDropZone('drop-zone', 'file-input', (f) => {}); // Ignore drop helper for multiple
+    document.getElementById('file-input').addEventListener('change', (e) => {
+      files = Array.from(e.target.files);
+      document.getElementById('list').innerHTML = files.map(f => `<li>${Common.escapeHtml(f.name)}</li>`).join('');
+      document.getElementById('controls').disabled = files.length < 2;
+    });
+    document.getElementById('process-btn').onclick = async () => {
+      if(files.length < 2) return;
+      const status = document.getElementById('status'), btn = document.getElementById('process-btn');
+      try {
+        btn.disabled = true; status.textContent = 'Loading Engine...';
+        const ffmpeg = await FFmpegHelper.load((p) => { status.textContent = `Processing: ${Math.round(p * 100)}%`; });
+        let txt = '';
+        for(let i=0; i<files.length; i++) {
+          await FFmpegHelper.write(files[i], `input${i}`);
+          txt += `file 'input${i}'\n`;
+        }
+        await ffmpeg.writeFile('list.txt', txt);
+        status.textContent = 'Merging...';
+        await ffmpeg.exec(['-f', 'concat', '-safe', '0', '-i', 'list.txt', '-c', 'copy', 'output.mp3']);
+        const data = await FFmpegHelper.read('output.mp3');
+        Common.downloadBlob(new Blob([data.buffer]), 'merged.mp3');
+        status.textContent = 'Done!';
+        await FFmpegHelper.cleanup(['list.txt', 'output.mp3', ...files.map((_,i)=>`input${i}`)]);
+      } catch(e) { status.textContent = 'Error: ' + e.message; } finally { btn.disabled = false; }
+    };
+  </script>
+</body>
+</html>

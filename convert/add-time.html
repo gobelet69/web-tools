@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add/Subtract Time - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Add/Subtract Time</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>Start Date & Time</legend>
+      <input type="datetime-local" id="dt" step="1">
+    </fieldset>
+    <fieldset>
+      <legend>Adjustment</legend>
+      <label>Days: <input type="number" id="ad" value="0"></label>
+      <label>Hours: <input type="number" id="ah" value="0"></label>
+      <label>Minutes: <input type="number" id="am" value="0"></label>
+    </fieldset>
+    <fieldset>
+      <legend>Resulting Date & Time</legend>
+      <p id="res" style="font-size: 1.2rem; font-weight: bold;">-</p>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('add-subtract-time');
+    const update = () => {
+      const dt = new Date(document.getElementById('dt').value);
+      if(isNaN(dt)) return;
+      const d = parseInt(document.getElementById('ad').value) || 0;
+      const h = parseInt(document.getElementById('ah').value) || 0;
+      const m = parseInt(document.getElementById('am').value) || 0;
+      dt.setDate(dt.getDate() + d);
+      dt.setHours(dt.getHours() + h);
+      dt.setMinutes(dt.getMinutes() + m);
+      document.getElementById('res').textContent = dt.toLocaleString();
+    };
+    ['dt','ad','ah','am'].forEach(id => document.getElementById(id).addEventListener('input', update));
+  </script>
+</body>
+</html>

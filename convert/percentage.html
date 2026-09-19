@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Percentage Calculator - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Percentage Calculator</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>What is X % of Y?</legend>
+      What is <input type="number" id="x1" value="20"> % of <input type="number" id="y1" value="150">?
+      <strong> = <span id="r1">30</span></strong>
+    </fieldset>
+    <fieldset>
+      <legend>X is what % of Y?</legend>
+      <input type="number" id="x2" value="30"> is what % of <input type="number" id="y2" value="150">?
+      <strong> = <span id="r2">20</span> %</strong>
+    </fieldset>
+    <fieldset>
+      <legend>Percentage Increase/Decrease</legend>
+      From <input type="number" id="x3" value="100"> to <input type="number" id="y3" value="120">
+      <strong> = <span id="r3">20</span> % change</strong>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('percentage-calc');
+    const update = (id1, id2, res, fn) => {
+      document.getElementById(id1).addEventListener('input', calc);
+      document.getElementById(id2).addEventListener('input', calc);
+      function calc() {
+        const v1 = parseFloat(document.getElementById(id1).value);
+        const v2 = parseFloat(document.getElementById(id2).value);
+        if(!isNaN(v1) && !isNaN(v2)) document.getElementById(res).textContent = fn(v1, v2);
+      }
+    };
+    update('x1','y1','r1', (x,y) => (x / 100) * y);
+    update('x2','y2','r2', (x,y) => (x / y) * 100);
+    update('x3','y3','r3', (x,y) => ((y - x) / Math.abs(x)) * 100);
+  </script>
+</body>
+</html>

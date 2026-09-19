@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Regex Tester - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+  <style>
+    .match { background-color: #ffeb3b; border-radius: 2px; }
+    .group { background-color: #bbdefb; border-radius: 2px; }
+  </style>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Regex Tester</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>Expression</legend>
+      <div style="display:flex; align-items:center;">
+        <span style="font-size:1.5rem;">/</span>
+        <input type="text" id="regex" value="([A-Z])\w+" style="flex-grow:1; font-family:monospace; font-size:1.2rem; margin:0 0.5rem;">
+        <span style="font-size:1.5rem;">/</span>
+        <input type="text" id="flags" value="g" style="width:50px; font-family:monospace; font-size:1.2rem; margin-left:0.5rem;">
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Test String</legend>
+      <textarea id="test-str" rows="5" style="width:100%; box-sizing:border-box;">Hello World and Universe</textarea>
+    </fieldset>
+    <fieldset>
+      <legend>Matches Output</legend>
+      <div id="output" style="white-space:pre-wrap; font-family:monospace; padding:1rem; border:1px solid #ccc; background:#fafafa; border-radius:4px; min-height:100px;"></div>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('regex-tester');
+    const update = () => {
+      const regStr = document.getElementById('regex').value;
+      const flags = document.getElementById('flags').value;
+      const testStr = document.getElementById('test-str').value;
+      const out = document.getElementById('output');
+      
+      try {
+        if(!regStr) { out.innerHTML = ''; return; }
+        const regex = new RegExp(regStr, flags);
+        if(!flags.includes('g')) {
+          const match = testStr.match(regex);
+          if(!match) { out.innerHTML = 'No matches.'; return; }
+          out.innerHTML = `<strong>Match:</strong> ${Common.escapeHtml(match[0])}\n` + match.slice(1).map((g,i) => `<strong>Group ${i+1}:</strong> ${Common.escapeHtml(g)}`).join('\n');
+          return;
+        }
+        
+        // Highlight logic for global
+        let highlighted = testStr.replace(regex, (match) => `<span class="match">${Common.escapeHtml(match)}</span>`);
+        out.innerHTML = highlighted;
+        
+      } catch (e) { out.innerHTML = `<span style="color:red;">Error: ${e.message}</span>`; }
+    };
+    ['regex','flags','test-str'].forEach(id => document.getElementById(id).addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

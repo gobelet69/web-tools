@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Case Converter - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header>
+    <nav><a href="../index.html">← Back to Tools</a></nav>
+    <h1>Case Converter</h1>
+    <button id="fav-btn">☆ Add to Favorites</button>
+    <p>Convert text to uppercase, lowercase, title case.</p>
+    <p><em>Processed locally in your browser.</em></p>
+  </header>
+
+  <main>
+    <fieldset>
+      <legend>Input Text</legend>
+      <textarea id="input-text" rows="8" style="width: 100%; box-sizing: border-box;"></textarea>
+    </fieldset>
+
+    <div style="margin: 1rem 0;">
+      <button onclick="convert('upper')">UPPERCASE</button>
+      <button onclick="convert('lower')">lowercase</button>
+      <button onclick="convert('title')">Title Case</button>
+      <button onclick="convert('cap')">Capitalize</button>
+      <button onclick="convert('reverse')">esreveR</button>
+    </div>
+
+    <fieldset>
+      <legend>Output Text</legend>
+      <textarea id="output-text" rows="8" style="width: 100%; box-sizing: border-box;" readonly></textarea>
+      <br>
+      <button id="copy-btn">Copy Output</button>
+    </fieldset>
+  </main>
+
+  <script>
+    'use strict';
+    Common.initTool('case-converter');
+
+    const input = document.getElementById('input-text');
+    const output = document.getElementById('output-text');
+    const copyBtn = document.getElementById('copy-btn');
+
+    function convert(type) {
+      const text = input.value;
+      let res = '';
+      if (type === 'upper') {
+        res = text.toUpperCase();
+      } else if (type === 'lower') {
+        res = text.toLowerCase();
+      } else if (type === 'title') {
+        res = text.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      } else if (type === 'cap') {
+        res = text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+      } else if (type === 'reverse') {
+        res = text.split('').reverse().join('');
+      }
+      output.value = res;
+    }
+
+    copyBtn.addEventListener('click', async () => {
+      if (output.value) {
+        await navigator.clipboard.writeText(output.value);
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => copyBtn.textContent = originalText, 1500);
+      }
+    });
+  </script>
+</body>
+</html>

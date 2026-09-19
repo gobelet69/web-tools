@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Resize - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header>
+    <nav><a href="../index.html">← Back to Tools</a></nav>
+    <h1>Image Resize</h1>
+    <button id="fav-btn">☆ Add to Favorites</button>
+    <p>Resize images to specific dimensions.</p>
+    <p><em>Processed locally in your browser. Your files are not uploaded.</em></p>
+  </header>
+
+  <main>
+    <fieldset id="drop-zone" style="border: 2px dashed #ccc; padding: 1rem; margin-bottom: 1rem;">
+      <legend>Select Image</legend>
+      <input type="file" id="file-input" accept="image/*">
+      <p>Or drag & drop an image here</p>
+    </fieldset>
+
+    <fieldset id="controls" disabled>
+      <legend>Dimensions</legend>
+      <label>
+        Width: 
+        <input type="number" id="width-input" min="1">
+      </label>
+      <label>
+        Height: 
+        <input type="number" id="height-input" min="1">
+      </label>
+      <label>
+        <input type="checkbox" id="aspect-ratio-btn" checked>
+        Keep aspect ratio
+      </label>
+      <br><br>
+      <button id="process-btn">Resize & Download</button>
+    </fieldset>
+
+    <fieldset id="info" hidden>
+      <legend>Information</legend>
+      <p>Original: <span id="orig-info"></span></p>
+      <p>Resized: <span id="new-info"></span></p>
+    </fieldset>
+    
+    <canvas id="canvas" hidden></canvas>
+  </main>
+
+  <script>
+    'use strict';
+    Common.initTool('image-resize');
+
+    const fileInput = document.getElementById('file-input');
+    const widthInput = document.getElementById('width-input');
+    const heightInput = document.getElementById('height-input');
+    const aspectBtn = document.getElementById('aspect-ratio-btn');
+    const processBtn = document.getElementById('process-btn');
+    const controls = document.getElementById('controls');
+    const origInfo = document.getElementById('orig-info');
+    const newInfo = document.getElementById('new-info');
+    const infoField = document.getElementById('info');
+    
+    let currentImage = null;
+    let origFile = null;
+    let origRatio = 1;
+
+    function handleFile(file) {
+      if (!file || !file.type.startsWith('image/')) return;
+      origFile = file;
+      
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        currentImage = img;
+        origRatio = img.width / img.height;
+        widthInput.value = img.width;
+        heightInput.value = img.height;
+        controls.disabled = false;
+        
+        origInfo.textContent = `${img.width}x${img.height} (${Common.formatBytes(file.size)})`;
+        infoField.hidden = false;
+        newInfo.textContent = 'Pending...';
+        URL.revokeObjectURL(url);
+      };
+      img.src = url;
+    }
+
+    Common.setupDropZone('drop-zone', 'file-input', handleFile);
+
+    widthInput.addEventListener('input', () => {
+      if (aspectBtn.checked && currentImage) {
+        heightInput.value = Math.round(widthInput.value / origRatio);
+      }
+    });
+
+    heightInput.addEventListener('input', () => {
+      if (aspectBtn.checked && currentImage) {
+        widthInput.value = Math.round(heightInput.value * origRatio);
+      }
+    });
+
+    processBtn.addEventListener('click', () => {
+      if (!currentImage) return;
+      
+      const w = parseInt(widthInput.value, 10);
+      const h = parseInt(heightInput.value, 10);
+      
+      if (isNaN(w) || isNaN(h) || w <= 0 || h <= 0) {
+        alert('Invalid dimensions');
+        return;
+      }
+
+      const canvas = document.getElementById('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(currentImage, 0, 0, w, h);
+      
+      canvas.toBlob((blob) => {
+        newInfo.textContent = `${w}x${h} (${Common.formatBytes(blob.size)})`;
+        Common.downloadBlob(blob, `resized-${origFile.name}`);
+      }, origFile.type);
+    });
+  </script>
+</body>
+</html>

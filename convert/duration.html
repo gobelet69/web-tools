@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Duration Calculator - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Duration Calculator</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>Times</legend>
+      <label>Start: <input type="time" id="t1"></label><br>
+      <label>End: <input type="time" id="t2"></label>
+    </fieldset>
+    <fieldset>
+      <legend>Duration</legend>
+      <p id="res" style="font-size: 1.2rem; font-weight: bold;">-</p>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('duration-calculator');
+    const update = () => {
+      const t1 = document.getElementById('t1').value;
+      const t2 = document.getElementById('t2').value;
+      if(!t1 || !t2) return;
+      const [h1, m1] = t1.split(':').map(Number);
+      const [h2, m2] = t2.split(':').map(Number);
+      let diffMins = (h2 * 60 + m2) - (h1 * 60 + m1);
+      if (diffMins < 0) diffMins += 24 * 60; // Next day
+      const hrs = Math.floor(diffMins / 60);
+      const mins = diffMins % 60;
+      document.getElementById('res').textContent = `${hrs} hours, ${mins} minutes`;
+    };
+    document.getElementById('t1').addEventListener('input', update);
+    document.getElementById('t2').addEventListener('input', update);
+  </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hash Generator - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header>
+    <nav><a href="../index.html">← Back to Tools</a></nav>
+    <h1>Hash Generator</h1>
+    <button id="fav-btn">☆ Add to Favorites</button>
+    <p>Generate SHA-1, SHA-256, SHA-384, SHA-512 hashes instantly.</p>
+    <p><em>Processed locally in your browser.</em></p>
+  </header>
+
+  <main>
+    <fieldset>
+      <legend>Input Text</legend>
+      <textarea id="input-text" rows="4" style="width: 100%; box-sizing: border-box;"></textarea>
+    </fieldset>
+
+    <fieldset>
+      <legend>Hashes</legend>
+      <label>SHA-1:
+        <input type="text" id="hash-sha1" readonly style="width: 100%; font-family: monospace; margin-bottom: 10px;">
+      </label>
+      <label>SHA-256:
+        <input type="text" id="hash-sha256" readonly style="width: 100%; font-family: monospace; margin-bottom: 10px;">
+      </label>
+      <label>SHA-384:
+        <input type="text" id="hash-sha384" readonly style="width: 100%; font-family: monospace; margin-bottom: 10px;">
+      </label>
+      <label>SHA-512:
+        <input type="text" id="hash-sha512" readonly style="width: 100%; font-family: monospace;">
+      </label>
+    </fieldset>
+  </main>
+
+  <script>
+    'use strict';
+    Common.initTool('hash-generator');
+
+    const input = document.getElementById('input-text');
+    const hashes = {
+      'SHA-1': document.getElementById('hash-sha1'),
+      'SHA-256': document.getElementById('hash-sha256'),
+      'SHA-384': document.getElementById('hash-sha384'),
+      'SHA-512': document.getElementById('hash-sha512')
+    };
+
+    async function hash(algo, text) {
+      const msgBuffer = new TextEncoder().encode(text);
+      const hashBuffer = await crypto.subtle.digest(algo, msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    input.addEventListener('input', async () => {
+      const text = input.value;
+      if (!text) {
+        Object.values(hashes).forEach(el => el.value = '');
+        return;
+      }
+      for (const [algo, el] of Object.entries(hashes)) {
+        el.value = await hash(algo, text);
+      }
+    });
+  </script>
+</body>
+</html>

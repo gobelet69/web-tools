@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML Entities - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>HTML Entities Encode / Decode</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset><legend>Input Text</legend><textarea id="input-text" rows="8" style="width: 100%; box-sizing: border-box;"></textarea></fieldset>
+    <button id="enc">Encode</button> <button id="dec">Decode</button>
+    <fieldset><legend>Output Text</legend><textarea id="output-text" rows="8" style="width: 100%; box-sizing: border-box;" readonly></textarea></fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('html-entities');
+    const input = document.getElementById('input-text'), output = document.getElementById('output-text');
+    document.getElementById('enc').onclick = () => {
+      const div = document.createElement('div');
+      div.textContent = input.value;
+      output.value = div.innerHTML;
+    };
+    document.getElementById('dec').onclick = () => {
+      const div = document.createElement('div');
+      div.innerHTML = input.value;
+      output.value = div.textContent;
+    };
+  </script>
+</body>
+</html>

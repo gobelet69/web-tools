@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JWT Decoder - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>JWT Decoder</h1><button id="fav-btn">☆ Add to Favorites</button>
+  <p><em>Warning: Decodes payload without verifying the signature. Do not trust decoded contents blindly!</em></p></header>
+  <main>
+    <fieldset><legend>JWT String</legend><textarea id="input-text" rows="4" style="width: 100%; box-sizing: border-box;"></textarea></fieldset>
+    <fieldset><legend>Header</legend><textarea id="out-head" rows="4" style="width: 100%; box-sizing: border-box;" readonly></textarea></fieldset>
+    <fieldset><legend>Payload</legend><textarea id="out-pay" rows="8" style="width: 100%; box-sizing: border-box;" readonly></textarea></fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('jwt-decoder');
+    document.getElementById('input-text').addEventListener('input', (e) => {
+      const parts = e.target.value.split('.');
+      if(parts.length !== 3) {
+        document.getElementById('out-head').value = 'Invalid JWT';
+        document.getElementById('out-pay').value = 'Invalid JWT';
+        return;
+      }
+      try {
+        const head = decodeURIComponent(escape(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/'))));
+        const pay = decodeURIComponent(escape(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))));
+        document.getElementById('out-head').value = JSON.stringify(JSON.parse(head), null, 2);
+        document.getElementById('out-pay').value = JSON.stringify(JSON.parse(pay), null, 2);
+      } catch(err) {
+        document.getElementById('out-head').value = 'Error parsing JWT';
+        document.getElementById('out-pay').value = 'Error parsing JWT';
+      }
+    });
+  </script>
+</body>
+</html>

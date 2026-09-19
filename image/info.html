@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Info - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Image Info</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset id="drop-zone"><legend>Select Image</legend><input type="file" id="file-input" accept="image/*"></fieldset>
+    <fieldset id="info" hidden>
+      <legend>Basic Metadata</legend>
+      <p>Filename: <strong id="name"></strong></p>
+      <p>File Size: <strong id="size"></strong></p>
+      <p>MIME Type: <strong id="type"></strong></p>
+      <p>Dimensions: <strong id="dim"></strong></p>
+      <p>Aspect Ratio: <strong id="ratio"></strong></p>
+      <img id="preview" style="max-width:100%; max-height:300px; margin-top:1rem;">
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('image-info');
+    Common.setupDropZone('drop-zone', 'file-input', (file) => {
+      if(!file || !file.type.startsWith('image/')) return;
+      document.getElementById('info').hidden = false;
+      document.getElementById('name').textContent = file.name;
+      document.getElementById('size').textContent = Common.formatBytes(file.size);
+      document.getElementById('type').textContent = file.type;
+      
+      const img = new Image();
+      img.onload = () => {
+        document.getElementById('dim').textContent = `${img.width} × ${img.height} px`;
+        document.getElementById('ratio').textContent = (img.width / img.height).toFixed(3);
+        document.getElementById('preview').src = img.src;
+      };
+      img.src = URL.createObjectURL(file);
+    });
+  </script>
+</body>
+</html>

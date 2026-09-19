@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timezone Converter - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Timezone Converter</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>Input Time</legend>
+      <input type="datetime-local" id="dt" step="1">
+    </fieldset>
+    <fieldset>
+      <legend>Target Timezone</legend>
+      <select id="tz">
+        <option value="UTC">UTC / GMT</option>
+        <option value="America/New_York">New York (EST/EDT)</option>
+        <option value="America/Los_Angeles">Los Angeles (PST/PDT)</option>
+        <option value="Europe/London">London (GMT/BST)</option>
+        <option value="Europe/Paris">Paris (CET/CEST)</option>
+        <option value="Asia/Tokyo">Tokyo (JST)</option>
+        <option value="Asia/Kolkata">India (IST)</option>
+        <option value="Australia/Sydney">Sydney (AEST/AEDT)</option>
+      </select>
+    </fieldset>
+    <fieldset>
+      <legend>Result</legend>
+      <p style="font-size: 1.2rem; font-weight: bold;" id="res">-</p>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('timezone-converter');
+    const update = () => {
+      const v = document.getElementById('dt').value;
+      if(!v) return;
+      const d = new Date(v);
+      const tz = document.getElementById('tz').value;
+      const options = { timeZone: tz, year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' };
+      document.getElementById('res').textContent = new Intl.DateTimeFormat('en-US', options).format(d);
+    };
+    document.getElementById('dt').addEventListener('input', update);
+    document.getElementById('tz').addEventListener('change', update);
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('dt').value = now.toISOString().slice(0,19);
+    update();
+  </script>
+</body>
+</html>

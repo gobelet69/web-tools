@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Date Difference - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Date Difference</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>Dates</legend>
+      <label>Start: <input type="date" id="d1"></label><br>
+      <label>End: <input type="date" id="d2"></label>
+    </fieldset>
+    <fieldset>
+      <legend>Difference</legend>
+      <p id="res" style="font-size: 1.2rem; font-weight: bold;">-</p>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('date-difference');
+    const update = () => {
+      const d1 = new Date(document.getElementById('d1').value);
+      const d2 = new Date(document.getElementById('d2').value);
+      if(isNaN(d1) || isNaN(d2)) return;
+      const diffMs = Math.abs(d2 - d1);
+      const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      document.getElementById('res').textContent = `${days} days`;
+    };
+    document.getElementById('d1').addEventListener('input', update);
+    document.getElementById('d2').addEventListener('input', update);
+  </script>
+</body>
+</html>

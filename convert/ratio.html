@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ratio Calculator - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Ratio Calculator</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>Simplify Ratio</legend>
+      <input type="number" id="r1" value="1920"> : <input type="number" id="r2" value="1080">
+      <strong> = <span id="out">16 : 9</span></strong>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('ratio-calc');
+    function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+    const r1 = document.getElementById('r1');
+    const r2 = document.getElementById('r2');
+    const out = document.getElementById('out');
+    function calc() {
+      const a = parseInt(r1.value);
+      const b = parseInt(r2.value);
+      if(isNaN(a) || isNaN(b) || a===0 || b===0) return;
+      const divisor = gcd(Math.abs(a), Math.abs(b));
+      out.textContent = `${a/divisor} : ${b/divisor}`;
+    }
+    r1.addEventListener('input', calc);
+    r2.addEventListener('input', calc);
+  </script>
+</body>
+</html>

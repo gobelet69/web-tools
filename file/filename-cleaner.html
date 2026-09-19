@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Filename Cleaner - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Filename Cleaner</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>Dirty Filename</legend>
+      <input type="text" id="dirty" style="width:100%; box-sizing:border-box;" value="My File (Copy) - 2023! @#$.jpg">
+    </fieldset>
+    <fieldset>
+      <legend>Clean Filename</legend>
+      <input type="text" id="clean" style="width:100%; box-sizing:border-box; font-family:monospace;" readonly>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('filename-cleaner');
+    document.getElementById('dirty').addEventListener('input', (e) => {
+      let v = e.target.value;
+      // Replace spaces with dashes, remove special chars, lowercase
+      v = v.toLowerCase().replace(/[^a-z0-9_.-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+      document.getElementById('clean').value = v;
+    });
+    document.getElementById('dirty').dispatchEvent(new Event('input'));
+  </script>
+</body>
+</html>

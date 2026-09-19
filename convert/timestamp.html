@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timestamp Converter - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header>
+    <nav><a href="../index.html">← Back to Tools</a></nav>
+    <h1>Timestamp Converter</h1>
+    <button id="fav-btn">☆ Add to Favorites</button>
+    <p>Convert between Unix timestamps and human-readable dates.</p>
+    <p><em>Processed locally in your browser.</em></p>
+  </header>
+
+  <main>
+    <fieldset>
+      <legend>Current Time</legend>
+      <p>Timestamp (seconds): <strong id="current-ts"></strong></p>
+      <p>Local Time: <strong id="current-local"></strong></p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Timestamp to Date</legend>
+      <label>
+        Unix Timestamp (seconds or ms):
+        <input type="number" id="ts-input" placeholder="e.g. 1718294400">
+      </label>
+      <button id="ts-convert-btn">Convert</button>
+      <br><br>
+      <output id="ts-output" style="font-weight: bold;"></output>
+    </fieldset>
+
+    <fieldset>
+      <legend>Date to Timestamp</legend>
+      <label>
+        Local Date & Time:
+        <input type="datetime-local" id="date-input" step="1">
+      </label>
+      <button id="date-convert-btn">Convert</button>
+      <br><br>
+      <output id="date-output" style="font-weight: bold;"></output>
+    </fieldset>
+  </main>
+
+  <script>
+    'use strict';
+    Common.initTool('timestamp-converter');
+
+    // Current Time Updater
+    function updateCurrent() {
+      const now = new Date();
+      document.getElementById('current-ts').textContent = Math.floor(now.getTime() / 1000);
+      document.getElementById('current-local').textContent = now.toLocaleString();
+    }
+    updateCurrent();
+    setInterval(updateCurrent, 1000);
+
+    // Timestamp to Date
+    document.getElementById('ts-convert-btn').addEventListener('click', () => {
+      let val = parseInt(document.getElementById('ts-input').value, 10);
+      if (isNaN(val)) return;
+      // Heuristic for seconds vs ms
+      if (val < 10000000000) val *= 1000;
+      
+      const date = new Date(val);
+      document.getElementById('ts-output').textContent = 
+        `UTC: ${date.toUTCString()} | Local: ${date.toLocaleString()}`;
+    });
+
+    // Date to Timestamp
+    document.getElementById('date-convert-btn').addEventListener('click', () => {
+      const val = document.getElementById('date-input').value;
+      if (!val) return;
+      const date = new Date(val);
+      const ts = Math.floor(date.getTime() / 1000);
+      document.getElementById('date-output').textContent = `Timestamp (sec): ${ts}`;
+    });
+  </script>
+</body>
+</html>

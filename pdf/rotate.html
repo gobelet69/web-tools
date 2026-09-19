@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Rotate - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+  <script src="../vendor/pdf-lib.min.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>PDF Rotate</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset id="drop-zone"><legend>Select PDF</legend><input type="file" id="file-input" accept="application/pdf"></fieldset>
+    <fieldset id="controls" disabled>
+      <legend>Rotate Pages</legend>
+      <p>File: <strong id="file-info"></strong></p>
+      <label>Rotation Angle:
+        <select id="angle">
+          <option value="90">90° Clockwise</option>
+          <option value="180">180° (Upside Down)</option>
+          <option value="270">90° Counter-Clockwise</option>
+        </select>
+      </label>
+      <br><br><button id="process-btn">Rotate & Download</button>
+      <span id="status-msg"></span>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('pdf-rotate');
+    let currentPdf = null, currentFile = null;
+    Common.setupDropZone('drop-zone', 'file-input', async (file) => {
+      if(!file || file.type !== 'application/pdf') return;
+      currentFile = file;
+      document.getElementById('file-info').textContent = file.name;
+      const buf = await file.arrayBuffer();
+      currentPdf = await PDFLib.PDFDocument.load(buf);
+      document.getElementById('controls').disabled = false;
+    });
+    document.getElementById('process-btn').onclick = async () => {
+      if(!currentPdf) return;
+      document.getElementById('process-btn').disabled = true;
+      document.getElementById('status-msg').textContent = 'Processing...';
+      try {
+        const pages = currentPdf.getPages();
+        const angle = parseInt(document.getElementById('angle').value);
+        pages.forEach(p => p.setRotation(PDFLib.degrees(angle)));
+        const bytes = await currentPdf.save();
+        Common.downloadBlob(new Blob([bytes], {type:'application/pdf'}), currentFile.name.replace('.pdf', '-rotated.pdf'));
+        document.getElementById('status-msg').textContent = 'Done!';
+      } catch(e) { document.getElementById('status-msg').textContent = 'Error: ' + e.message; }
+      finally { document.getElementById('process-btn').disabled = false; }
+    };
+  </script>
+</body>
+</html>

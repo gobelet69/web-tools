@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Base64 Encode/Decode - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header>
+    <nav><a href="../index.html">← Back to Tools</a></nav>
+    <h1>Base64 Encode/Decode</h1>
+    <button id="fav-btn">☆ Add to Favorites</button>
+    <p>Encode or decode Base64 strings safely with Unicode support.</p>
+    <p><em>Processed locally in your browser.</em></p>
+  </header>
+
+  <main>
+    <fieldset>
+      <legend>Input</legend>
+      <textarea id="input-text" rows="8" style="width: 100%; box-sizing: border-box;"></textarea>
+    </fieldset>
+
+    <div style="margin: 1rem 0;">
+      <button id="encode-btn">Encode to Base64</button>
+      <button id="decode-btn">Decode from Base64</button>
+    </div>
+
+    <fieldset>
+      <legend>Output</legend>
+      <textarea id="output-text" rows="8" style="width: 100%; box-sizing: border-box;" readonly></textarea>
+      <br>
+      <button id="copy-btn">Copy Output</button>
+    </fieldset>
+  </main>
+
+  <script>
+    'use strict';
+    Common.initTool('base64');
+
+    const input = document.getElementById('input-text');
+    const output = document.getElementById('output-text');
+    const encodeBtn = document.getElementById('encode-btn');
+    const decodeBtn = document.getElementById('decode-btn');
+    const copyBtn = document.getElementById('copy-btn');
+
+    // Unicode-safe Base64 encoding
+    function base64Encode(str) {
+      const bytes = new TextEncoder().encode(str);
+      const binString = String.fromCodePoint(...bytes);
+      return btoa(binString);
+    }
+
+    // Unicode-safe Base64 decoding
+    function base64Decode(b64) {
+      const binString = atob(b64);
+      const bytes = Uint8Array.from(binString, (m) => m.codePointAt(0));
+      return new TextDecoder().decode(bytes);
+    }
+
+    encodeBtn.addEventListener('click', () => {
+      try {
+        output.value = base64Encode(input.value);
+      } catch (e) {
+        output.value = 'Error: ' + e.message;
+      }
+    });
+
+    decodeBtn.addEventListener('click', () => {
+      try {
+        output.value = base64Decode(input.value.trim());
+      } catch (e) {
+        output.value = 'Error: Invalid Base64 input.';
+      }
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      if (output.value) {
+        await navigator.clipboard.writeText(output.value);
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => copyBtn.textContent = originalText, 1500);
+      }
+    });
+  </script>
+</body>
+</html>

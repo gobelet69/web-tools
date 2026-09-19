@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIDR Calculator - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>CIDR Calculator</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>CIDR Notation</legend>
+      <input type="text" id="cidr-in" value="10.0.0.0/8" style="width:100%; font-size:1.2rem;">
+    </fieldset>
+    <fieldset>
+      <legend>Details</legend>
+      <table style="width:100%; border-collapse:collapse; text-align:left;">
+        <tbody id="out"></tbody>
+      </table>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('cidr-calculator');
+    function ipToInt(ip) { return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0; }
+    function intToIp(int) { return [ (int >>> 24) & 255, (int >>> 16) & 255, (int >>> 8) & 255, int & 255 ].join('.'); }
+    
+    document.getElementById('cidr-in').addEventListener('input', (e) => {
+      const parts = e.target.value.split('/');
+      const out = document.getElementById('out');
+      if(parts.length !== 2) { out.innerHTML = '<tr><td style="color:red;">Format must be IP/CIDR (e.g. 192.168.1.0/24)</td></tr>'; return; }
+      
+      const ipStr = parts[0];
+      const cidr = parseInt(parts[1]);
+      
+      if(!ipStr.match(/^(\d{1,3}\.){3}\d{1,3}$/) || isNaN(cidr) || cidr < 0 || cidr > 32) { out.innerHTML = '<tr><td style="color:red;">Invalid format</td></tr>'; return; }
+      
+      const ip = ipToInt(ipStr);
+      const mask = cidr === 0 ? 0 : (~0 << (32 - cidr)) >>> 0;
+      const network = (ip & mask) >>> 0;
+      const broadcast = (network | ~mask) >>> 0;
+      const hosts = cidr === 32 ? 1 : cidr === 31 ? 2 : (broadcast - network - 1);
+      
+      const addRow = (label, val) => `<tr><td style="border:1px solid #ccc; padding:0.5rem; font-weight:bold;">${label}</td><td style="border:1px solid #ccc; padding:0.5rem; font-family:monospace;">${val}</td></tr>`;
+      out.innerHTML = addRow('Network', intToIp(network)) +
+                      addRow('Mask', intToIp(mask)) +
+                      addRow('Broadcast', intToIp(broadcast)) +
+                      addRow('Hosts', hosts.toLocaleString());
+    });
+    document.getElementById('cidr-in').dispatchEvent(new Event('input'));
+  </script>
+</body>
+</html>

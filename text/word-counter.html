@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word Counter - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header>
+    <nav><a href="../index.html">← Back to Tools</a></nav>
+    <h1>Word Counter</h1>
+    <button id="fav-btn">☆ Add to Favorites</button>
+    <p>Count characters, words, lines, paragraphs, and reading time.</p>
+    <p><em>Processed locally in your browser.</em></p>
+  </header>
+
+  <main>
+    <fieldset>
+      <legend>Text</legend>
+      <textarea id="input-text" rows="12" style="width: 100%; box-sizing: border-box;"></textarea>
+    </fieldset>
+
+    <fieldset>
+      <legend>Statistics</legend>
+      <ul>
+        <li>Characters: <strong id="char-count">0</strong></li>
+        <li>Characters (no spaces): <strong id="char-no-space-count">0</strong></li>
+        <li>Words: <strong id="word-count">0</strong></li>
+        <li>Lines: <strong id="line-count">0</strong></li>
+        <li>Paragraphs: <strong id="para-count">0</strong></li>
+        <li>Reading Time: <strong id="read-time">0 min</strong></li>
+      </ul>
+    </fieldset>
+  </main>
+
+  <script>
+    'use strict';
+    Common.initTool('word-counter');
+
+    const input = document.getElementById('input-text');
+    
+    input.addEventListener('input', () => {
+      const text = input.value;
+      
+      const chars = text.length;
+      document.getElementById('char-count').textContent = chars;
+      
+      const charsNoSpace = text.replace(/\s+/g, '').length;
+      document.getElementById('char-no-space-count').textContent = charsNoSpace;
+      
+      const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+      document.getElementById('word-count').textContent = words;
+      
+      const lines = text === '' ? 0 : text.split(/\r\n|\r|\n/).length;
+      document.getElementById('line-count').textContent = lines;
+      
+      const paragraphs = text.trim() === '' ? 0 : text.split(/\n\s*\n/).filter(p => p.trim().length > 0).length;
+      document.getElementById('para-count').textContent = paragraphs;
+      
+      const readingMins = Math.ceil(words / 200);
+      document.getElementById('read-time').textContent = `~${readingMins} min`;
+    });
+  </script>
+</body>
+</html>

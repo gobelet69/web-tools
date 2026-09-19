@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reverse Text - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header>
+    <nav><a href="../index.html">← Back to Tools</a></nav>
+    <h1>Reverse Text</h1>
+    <button id="fav-btn">☆ Add to Favorites</button>
+    <p>Reverse a string of text.</p>
+    <p><em>Processed locally in your browser.</em></p>
+  </header>
+  <main>
+    <fieldset>
+      <legend>Input Text</legend>
+      <textarea id="input-text" rows="8" style="width: 100%; box-sizing: border-box;"></textarea>
+    </fieldset>
+    <fieldset>
+      <legend>Output Text</legend>
+      <textarea id="output-text" rows="8" style="width: 100%; box-sizing: border-box;" readonly></textarea>
+      <br><button id="copy-btn">Copy Output</button>
+    </fieldset>
+  </main>
+  <script>
+    'use strict';
+    Common.initTool('text-reverse');
+    const input = document.getElementById('input-text');
+    const output = document.getElementById('output-text');
+    input.addEventListener('input', () => { output.value = input.value.split('').reverse().join(''); });
+    document.getElementById('copy-btn').addEventListener('click', async () => {
+      if (output.value) { await navigator.clipboard.writeText(output.value); }
+    });
+  </script>
+</body>
+</html>

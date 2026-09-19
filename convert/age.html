@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Age Calculator - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Age Calculator</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>Birth Date</legend>
+      <input type="date" id="bd">
+    </fieldset>
+    <fieldset>
+      <legend>Current Age</legend>
+      <p id="res" style="font-size: 1.2rem; font-weight: bold;">-</p>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('age-calculator');
+    document.getElementById('bd').addEventListener('input', (e) => {
+      const birth = new Date(e.target.value);
+      if(isNaN(birth)) return;
+      const today = new Date();
+      let age = today.getFullYear() - birth.getFullYear();
+      const m = today.getMonth() - birth.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+        age--;
+      }
+      document.getElementById('res').textContent = `${age} years old`;
+    });
+  </script>
+</body>
+</html>

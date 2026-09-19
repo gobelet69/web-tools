@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image to Base64 - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Image to Base64</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset id="drop-zone"><legend>Select Image</legend><input type="file" id="file-input" accept="image/*"></fieldset>
+    <fieldset id="info" hidden>
+      <legend>Base64 Data URI</legend>
+      <img id="preview" style="max-height:200px; display:block; margin-bottom:1rem;">
+      <textarea id="output" rows="10" style="width:100%;" readonly></textarea>
+      <br><button id="copy-btn">Copy Base64</button>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('image-to-base64');
+    Common.setupDropZone('drop-zone', 'file-input', (file) => {
+      if(!file || !file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('info').hidden = false;
+        document.getElementById('preview').src = e.target.result;
+        document.getElementById('output').value = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+    document.getElementById('copy-btn').onclick = () => navigator.clipboard.writeText(document.getElementById('output').value);
+  </script>
+</body>
+</html>

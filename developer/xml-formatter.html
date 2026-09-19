@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XML Formatter - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>XML Formatter</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset><legend>Input XML</legend><textarea id="input-text" rows="8" style="width: 100%; box-sizing: border-box;"></textarea></fieldset>
+    <button id="format-btn">Format (2 Spaces)</button>
+    <fieldset><legend>Output</legend><textarea id="output-text" rows="12" style="width: 100%; box-sizing: border-box;" readonly></textarea></fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('xml-formatter');
+    function formatXml(xml) {
+      let formatted = '', indent = '';
+      const tab = '  ';
+      xml.split(/>\s*</).forEach(node => {
+        if(node.match(/^\/\w/)) indent = indent.substring(tab.length);
+        formatted += indent + '<' + node + '>\r\n';
+        if(node.match(/^<?\w[^>]*[^\/]$/) && !node.startsWith('input')) indent += tab;
+      });
+      return formatted.substring(1, formatted.length - 3);
+    }
+    document.getElementById('format-btn').onclick = () => {
+      let val = document.getElementById('input-text').value;
+      if(!val) return;
+      document.getElementById('output-text').value = formatXml(val);
+    };
+  </script>
+</body>
+</html>

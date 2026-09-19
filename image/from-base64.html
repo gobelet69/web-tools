@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Base64 to Image - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Base64 to Image</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>Base64 String (Data URI)</legend>
+      <textarea id="input-b64" rows="10" style="width:100%;" placeholder="data:image/png;base64,iVBORw0KGgo..."></textarea>
+      <br><button id="preview-btn">Preview & Download</button>
+    </fieldset>
+    <fieldset id="info" hidden>
+      <legend>Recovered Image</legend>
+      <img id="preview" style="max-width:100%; border:1px solid #ccc; margin-bottom:1rem;">
+      <br><a id="dl-link" download="recovered-image.png"><button>Download Image</button></a>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('base64-to-image');
+    document.getElementById('preview-btn').onclick = () => {
+      let b64 = document.getElementById('input-b64').value.trim();
+      if(!b64) return;
+      if(!b64.startsWith('data:image')) {
+        // Guess it's a raw png or jpg string
+        b64 = 'data:image/png;base64,' + b64;
+      }
+      document.getElementById('info').hidden = false;
+      document.getElementById('preview').src = b64;
+      
+      // Determine extension for download
+      let ext = 'png';
+      if(b64.includes('image/jpeg')) ext = 'jpg';
+      if(b64.includes('image/webp')) ext = 'webp';
+      if(b64.includes('image/gif')) ext = 'gif';
+      
+      const dl = document.getElementById('dl-link');
+      dl.href = b64;
+      dl.download = `recovered-image.${ext}`;
+    };
+  </script>
+</body>
+</html>

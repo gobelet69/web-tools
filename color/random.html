@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Random Color Generator - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Random Color Generator</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset style="text-align:center;">
+      <legend>Color</legend>
+      <div id="preview" style="width: 200px; height: 200px; margin: 0 auto; background: #000; border-radius: 8px;"></div>
+      <br>
+      <h2 id="hex-out">#000000</h2>
+      <h3 id="rgb-out">rgb(0, 0, 0)</h3>
+      <button id="gen-btn" style="padding: 1rem 2rem; font-size: 1.2rem;">Generate Random Color</button>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('random-color');
+    const toHex = (n) => { const h = n.toString(16); return h.length===1 ? "0"+h : h; };
+    document.getElementById('gen-btn').onclick = () => {
+      const r = Math.floor(Math.random() * 256), g = Math.floor(Math.random() * 256), b = Math.floor(Math.random() * 256);
+      const hex = '#' + toHex(r) + toHex(g) + toHex(b);
+      const rgb = `rgb(${r}, ${g}, ${b})`;
+      document.getElementById('preview').style.background = hex;
+      document.getElementById('hex-out').textContent = hex;
+      document.getElementById('rgb-out').textContent = rgb;
+    };
+    document.getElementById('gen-btn').click();
+  </script>
+</body>
+</html>

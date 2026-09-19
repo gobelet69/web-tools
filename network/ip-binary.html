@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IP to Binary - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>IP to Binary</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset>
+      <legend>IPv4 to Binary</legend>
+      <input type="text" id="ip-in" value="192.168.1.1">
+      <br>Binary: <strong id="bin-out" style="font-family:monospace;"></strong>
+    </fieldset>
+    <fieldset>
+      <legend>Binary to IPv4</legend>
+      <input type="text" id="bin-in" value="11000000.10101000.00000001.00000001">
+      <br>IPv4: <strong id="ip-out" style="font-family:monospace;"></strong>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('ip-binary');
+    document.getElementById('ip-in').addEventListener('input', (e) => {
+      const parts = e.target.value.split('.');
+      if(parts.length === 4) {
+        document.getElementById('bin-out').textContent = parts.map(p => parseInt(p).toString(2).padStart(8, '0')).join('.');
+      } else {
+        document.getElementById('bin-out').textContent = 'Invalid IPv4';
+      }
+    });
+    document.getElementById('bin-in').addEventListener('input', (e) => {
+      const parts = e.target.value.split('.');
+      if(parts.length === 4) {
+        document.getElementById('ip-out').textContent = parts.map(p => parseInt(p, 2).toString(10)).join('.');
+      } else {
+        document.getElementById('ip-out').textContent = 'Invalid Binary IP';
+      }
+    });
+    document.getElementById('ip-in').dispatchEvent(new Event('input'));
+    document.getElementById('bin-in').dispatchEvent(new Event('input'));
+  </script>
+</body>
+</html>

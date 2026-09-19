@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Extractor - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Color Extractor</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset id="drop-zone"><legend>Select Image</legend><input type="file" id="file-input" accept="image/*"></fieldset>
+    <fieldset id="out" hidden>
+      <legend>Dominant Colors (Approximate)</legend>
+      <img id="preview" style="max-height: 200px; display:block; margin-bottom:1rem;">
+      <div id="palette" style="display:flex; height:100px; border-radius:4px; overflow:hidden;"></div>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('color-extractor');
+    Common.setupDropZone('drop-zone', 'file-input', (file) => {
+      if(!file || !file.type.startsWith('image/')) return;
+      const img = new Image();
+      img.onload = () => {
+        document.getElementById('out').hidden = false;
+        document.getElementById('preview').src = img.src;
+        
+        // Draw to tiny canvas to average colors
+        const cvs = document.createElement('canvas');
+        cvs.width = 100; cvs.height = 100;
+        const ctx = cvs.getContext('2d');
+        ctx.drawImage(img, 0, 0, 100, 100);
+        
+        const data = ctx.getImageData(0,0,100,100).data;
+        const buckets = {};
+        for(let i=0; i<data.length; i+=16) {
+          // Quantize to multiples of 32 to group similar colors
+          const r = Math.round(data[i]/32)*32;
+          const g = Math.round(data[i+1]/32)*32;
+          const b = Math.round(data[i+2]/32)*32;
+          const key = `rgb(${Math.min(255,r)},${Math.min(255,g)},${Math.min(255,b)})`;
+          buckets[key] = (buckets[key] || 0) + 1;
+        }
+        const sorted = Object.entries(buckets).sort((a,b) => b[1] - a[1]).slice(0, 6);
+        
+        document.getElementById('palette').innerHTML = sorted.map(c => `<div style="flex:1; background:${c[0]};" title="${c[0]}"></div>`).join('');
+      };
+      img.src = URL.createObjectURL(file);
+    });
+  </script>
+</body>
+</html>

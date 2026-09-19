@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON Minifier - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>JSON Minifier</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset><legend>Input JSON</legend><textarea id="input-text" rows="8" style="width: 100%; box-sizing: border-box;"></textarea></fieldset>
+    <button id="minify-btn">Minify</button>
+    <fieldset><legend>Output Minified JSON</legend><textarea id="output-text" rows="8" style="width: 100%; box-sizing: border-box;" readonly></textarea></fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('json-minifier');
+    document.getElementById('minify-btn').onclick = () => {
+      try { document.getElementById('output-text').value = JSON.stringify(JSON.parse(document.getElementById('input-text').value)); }
+      catch(e) { document.getElementById('output-text').value = 'Invalid JSON'; }
+    };
+  </script>
+</body>
+</html>

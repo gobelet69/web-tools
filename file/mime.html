@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MIME Type Info - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>MIME Type Info</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset id="drop-zone">
+      <legend>Select File</legend>
+      <input type="file" id="file-input">
+      <p>Select a file to view its MIME type reported by the browser.</p>
+    </fieldset>
+    <fieldset id="info" hidden>
+      <legend>Information</legend>
+      <p>Filename: <strong id="fname"></strong></p>
+      <p>Size: <strong id="fsize"></strong></p>
+      <p>MIME Type: <strong id="fmime" style="font-size: 1.2rem; color: blue;"></strong></p>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('mime-info');
+    Common.setupDropZone('drop-zone', 'file-input', (file) => {
+      if(!file) return;
+      document.getElementById('info').hidden = false;
+      document.getElementById('fname').textContent = file.name;
+      document.getElementById('fsize').textContent = Common.formatBytes(file.size);
+      document.getElementById('fmime').textContent = file.type || 'Unknown / Application-Octet-Stream';
+    });
+  </script>
+</body>
+</html>

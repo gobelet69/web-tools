@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unit Converter - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+</head>
+<body>
+  <header>
+    <nav><a href="../index.html">← Back to Tools</a></nav>
+    <h1>Unit Converter</h1>
+    <button id="fav-btn">☆ Add to Favorites</button>
+    <p>Convert length, mass, temperature, and data storage.</p>
+    <p><em>Processed locally in your browser.</em></p>
+  </header>
+
+  <main>
+    <fieldset>
+      <legend>Converter</legend>
+      <label>
+        Category:
+        <select id="cat-select">
+          <option value="length">Length</option>
+          <option value="mass">Mass / Weight</option>
+          <option value="temp">Temperature</option>
+          <option value="data">Data Storage</option>
+        </select>
+      </label>
+      <br><br>
+      <label>
+        Value: 
+        <input type="number" id="input-val" value="1" step="any">
+      </label>
+      <select id="unit-from"></select>
+      <span> = </span>
+      <output id="output-val" style="font-weight: bold; font-size: 1.2rem;">?</output>
+      <select id="unit-to"></select>
+    </fieldset>
+  </main>
+
+  <script>
+    'use strict';
+    Common.initTool('unit-converter');
+
+    const units = {
+      length: {
+        base: 'm',
+        rates: {
+          'Millimeter (mm)': 0.001,
+          'Centimeter (cm)': 0.01,
+          'Meter (m)': 1,
+          'Kilometer (km)': 1000,
+          'Inch (in)': 0.0254,
+          'Foot (ft)': 0.3048,
+          'Yard (yd)': 0.9144,
+          'Mile (mi)': 1609.344
+        }
+      },
+      mass: {
+        base: 'kg',
+        rates: {
+          'Milligram (mg)': 0.000001,
+          'Gram (g)': 0.001,
+          'Kilogram (kg)': 1,
+          'Metric Ton (t)': 1000,
+          'Ounce (oz)': 0.02834952,
+          'Pound (lb)': 0.45359237
+        }
+      },
+      data: {
+        base: 'B',
+        rates: {
+          'Bit (b)': 0.125,
+          'Byte (B)': 1,
+          'Kilobyte (KB)': 1024,
+          'Megabyte (MB)': 1048576,
+          'Gigabyte (GB)': 1073741824,
+          'Terabyte (TB)': 1099511627776
+        }
+      }
+    };
+
+    const catSelect = document.getElementById('cat-select');
+    const unitFrom = document.getElementById('unit-from');
+    const unitTo = document.getElementById('unit-to');
+    const inputVal = document.getElementById('input-val');
+    const outputVal = document.getElementById('output-val');
+
+    function populateUnits() {
+      const cat = catSelect.value;
+      unitFrom.innerHTML = '';
+      unitTo.innerHTML = '';
+      
+      if (cat === 'temp') {
+        const temps = ['Celsius (°C)', 'Fahrenheit (°F)', 'Kelvin (K)'];
+        temps.forEach(t => {
+          unitFrom.add(new Option(t, t));
+          unitTo.add(new Option(t, t));
+        });
+        unitTo.selectedIndex = 1;
+      } else {
+        const uNames = Object.keys(units[cat].rates);
+        uNames.forEach(u => {
+          unitFrom.add(new Option(u, u));
+          unitTo.add(new Option(u, u));
+        });
+        if (uNames.length > 1) unitTo.selectedIndex = 1;
+      }
+      convert();
+    }
+
+    function convertTemp(val, from, to) {
+      let c;
+      // Convert to Celsius
+      if (from.includes('Celsius')) c = val;
+      else if (from.includes('Fahrenheit')) c = (val - 32) * 5/9;
+      else if (from.includes('Kelvin')) c = val - 273.15;
+      
+      // Celsius to target
+      if (to.includes('Celsius')) return c;
+      else if (to.includes('Fahrenheit')) return (c * 9/5) + 32;
+      else if (to.includes('Kelvin')) return c + 273.15;
+    }
+
+    function convert() {
+      const cat = catSelect.value;
+      const val = parseFloat(inputVal.value);
+      if (isNaN(val)) {
+        outputVal.textContent = '?';
+        return;
+      }
+
+      if (cat === 'temp') {
+        const res = convertTemp(val, unitFrom.value, unitTo.value);
+        outputVal.textContent = parseFloat(res.toFixed(6));
+      } else {
+        const fromRate = units[cat].rates[unitFrom.value];
+        const toRate = units[cat].rates[unitTo.value];
+        const baseVal = val * fromRate;
+        const res = baseVal / toRate;
+        outputVal.textContent = parseFloat(res.toFixed(6));
+      }
+    }
+
+    catSelect.addEventListener('change', populateUnits);
+    unitFrom.addEventListener('change', convert);
+    unitTo.addEventListener('change', convert);
+    inputVal.addEventListener('input', convert);
+
+    // Initial setup
+    populateUnits();
+  </script>
+</body>
+</html>

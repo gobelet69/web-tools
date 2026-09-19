@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Metadata - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+  <script src="../vendor/pdf-lib.min.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>PDF Metadata</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <fieldset id="drop-zone"><legend>Select PDF</legend><input type="file" id="file-input" accept="application/pdf"></fieldset>
+    <fieldset id="info" hidden>
+      <legend>Metadata</legend>
+      <table style="width:100%; border-collapse:collapse; text-align:left;">
+        <tbody id="out"></tbody>
+      </table>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('pdf-metadata');
+    Common.setupDropZone('drop-zone', 'file-input', async (file) => {
+      if(!file || file.type !== 'application/pdf') return;
+      const buf = await file.arrayBuffer();
+      const pdf = await PDFLib.PDFDocument.load(buf, { updateMetadata: false });
+      const out = document.getElementById('out');
+      out.innerHTML = '';
+      const add = (k, v) => out.innerHTML += `<tr><td style="border:1px solid #ccc; padding:4px;"><strong>${Common.escapeHtml(k)}</strong></td><td style="border:1px solid #ccc; padding:4px;">${Common.escapeHtml(v) || '-'}</td></tr>`;
+      
+      add('Title', pdf.getTitle());
+      add('Author', pdf.getAuthor());
+      add('Subject', pdf.getSubject());
+      add('Keywords', pdf.getKeywords());
+      add('Creator', pdf.getCreator());
+      add('Producer', pdf.getProducer());
+      add('Creation Date', pdf.getCreationDate() ? pdf.getCreationDate().toISOString() : null);
+      add('Modification Date', pdf.getModificationDate() ? pdf.getModificationDate().toISOString() : null);
+      add('Page Count', pdf.getPageCount());
+      document.getElementById('info').hidden = false;
+    });
+  </script>
+</body>
+</html>

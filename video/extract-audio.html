@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Extract Audio from Video - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+  <script src="../vendor/ffmpeg/ffmpeg.js"></script>
+  <script src="../vendor/ffmpeg/util.js"></script>
+  <script src="../js/ffmpeg-helper.js"></script>
+</head>
+<body>
+  <header><nav><a href="../index.html">← Back to Tools</a></nav><h1>Extract Audio</h1><button id="fav-btn">☆ Add to Favorites</button></header>
+  <main>
+    <div id="unsupported" hidden style="color:red; font-weight:bold; margin-bottom:1rem;">Your browser/server does not support SharedArrayBuffer. Processing will fail.</div>
+    <fieldset id="drop-zone"><legend>Select Video</legend><input type="file" id="file-input" accept="video/*"></fieldset>
+    <fieldset id="controls" disabled>
+      <legend>Options</legend>
+      <button id="process-btn">Extract to MP3</button>
+      <p id="status" style="font-weight:bold; color:blue;"></p>
+    </fieldset>
+  </main>
+  <script>
+    'use strict'; Common.initTool('video-extract-audio');
+    if(typeof SharedArrayBuffer === 'undefined') document.getElementById('unsupported').hidden = false;
+    let file = null;
+    Common.setupDropZone('drop-zone', 'file-input', (f) => { file = f; document.getElementById('controls').disabled = false; });
+    document.getElementById('process-btn').onclick = async () => {
+      if(!file) return;
+      const status = document.getElementById('status'), btn = document.getElementById('process-btn');
+      try {
+        btn.disabled = true; status.textContent = 'Loading Engine...';
+        const ffmpeg = await FFmpegHelper.load((p) => { status.textContent = `Processing: ${Math.round(p * 100)}%`; });
+        await FFmpegHelper.write(file, 'input');
+        status.textContent = 'Extracting...';
+        await ffmpeg.exec(['-i', 'input', '-q:a', '0', '-map', 'a', 'output.mp3']);
+        const data = await FFmpegHelper.read('output.mp3');
+        Common.downloadBlob(new Blob([data.buffer]), file.name.replace(/\.[^/.]+$/, "") + '-audio.mp3');
+        status.textContent = 'Done!';
+        await FFmpegHelper.cleanup(['input', 'output.mp3']);
+      } catch(e) { status.textContent = 'Error: ' + e.message; } finally { btn.disabled = false; }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Images to PDF - Swiss Army Knife</title>
+  <script src="../js/tools.js"></script>
+  <script src="../js/common.js"></script>
+  <!-- Load pdf-lib from local vendor folder -->
+  <script src="../vendor/pdf-lib.min.js"></script>
+</head>
+<body>
+  <header>
+    <nav><a href="../index.html">← Back to Tools</a></nav>
+    <h1>Images to PDF</h1>
+    <button id="fav-btn">☆ Add to Favorites</button>
+    <p>Convert multiple images into a single PDF document.</p>
+    <p><em>Processed locally in your browser. Your files are not uploaded.</em></p>
+  </header>
+
+  <main>
+    <fieldset id="drop-zone">
+      <legend>Select Images</legend>
+      <input type="file" id="file-input" accept="image/png, image/jpeg" multiple>
+      <p>Select multiple JPG/PNG images, or drag & drop them here.</p>
+    </fieldset>
+
+    <fieldset id="controls" disabled>
+      <legend>Selected Images (Order matters)</legend>
+      <ul id="file-list" style="list-style: none; padding: 0; margin-bottom: 1rem;"></ul>
+      
+      <button id="process-btn" style="padding: 0.5rem 1rem; font-weight: bold;">Create PDF</button>
+      <span id="status-msg" style="margin-left: 1rem;"></span>
+    </fieldset>
+  </main>
+
+  <script>
+    'use strict';
+    Common.initTool('images-to-pdf');
+
+    const fileInput = document.getElementById('file-input');
+    const processBtn = document.getElementById('process-btn');
+    const controls = document.getElementById('controls');
+    const fileListEl = document.getElementById('file-list');
+    const statusMsg = document.getElementById('status-msg');
+    
+    let files = [];
+
+    function updateFileList() {
+      fileListEl.innerHTML = '';
+      files.forEach((file, index) => {
+        const li = document.createElement('li');
+        li.style.padding = '0.5rem';
+        li.style.border = '1px solid #eee';
+        li.style.marginBottom = '0.2rem';
+        li.style.display = 'flex';
+        li.style.justifyContent = 'space-between';
+        li.style.alignItems = 'center';
+        
+        const span = document.createElement('span');
+        span.textContent = `${index + 1}. ${file.name} (${Common.formatBytes(file.size)})`;
+        li.appendChild(span);
+        
+        const actions = document.createElement('div');
+        
+        if (index > 0) {
+          const upBtn = document.createElement('button');
+          upBtn.textContent = '↑';
+          upBtn.onclick = () => {
+            const temp = files[index - 1];
+            files[index - 1] = files[index];
+            files[index] = temp;
+            updateFileList();
+          };
+          actions.appendChild(upBtn);
+        }
+        
+        if (index < files.length - 1) {
+          const downBtn = document.createElement('button');
+          downBtn.textContent = '↓';
+          downBtn.onclick = () => {
+            const temp = files[index + 1];
+            files[index + 1] = files[index];
+            files[index] = temp;
+            updateFileList();
+          };
+          actions.appendChild(downBtn);
+        }
+        
+        const delBtn = document.createElement('button');
+        delBtn.textContent = 'X';
+        delBtn.style.marginLeft = '0.5rem';
+        delBtn.onclick = () => {
+          files.splice(index, 1);
+          updateFileList();
+        };
+        actions.appendChild(delBtn);
+        
+        li.appendChild(actions);
+        fileListEl.appendChild(li);
+      });
+      
+      controls.disabled = files.length === 0;
+    }
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) {
+        files.push(...Array.from(e.target.files).filter(f => f.type === 'image/jpeg' || f.type === 'image/png'));
+        updateFileList();
+        fileInput.value = ''; // Reset input
+      }
+    });
+
+    const dropZone = document.getElementById('drop-zone');
+    dropZone.classList.add('drop-zone');
+    
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.style.background = '#eee';
+    });
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.style.background = '';
+    });
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.style.background = '';
+      if (e.dataTransfer.files.length) {
+        files.push(...Array.from(e.dataTransfer.files).filter(f => f.type === 'image/jpeg' || f.type === 'image/png'));
+        updateFileList();
+      }
+    });
+
+    processBtn.addEventListener('click', async () => {
+      if (files.length === 0) return;
+      
+      try {
+        statusMsg.textContent = 'Processing...';
+        processBtn.disabled = true;
+        
+        const PDFDocument = PDFLib.PDFDocument;
+        const pdfDoc = await PDFDocument.create();
+        
+        for (const file of files) {
+          const arrayBuffer = await file.arrayBuffer();
+          let pdfImage;
+          
+          if (file.type === 'image/jpeg') {
+            pdfImage = await pdfDoc.embedJpg(arrayBuffer);
+          } else if (file.type === 'image/png') {
+            pdfImage = await pdfDoc.embedPng(arrayBuffer);
+          }
+          
+          if (pdfImage) {
+            const page = pdfDoc.addPage([pdfImage.width, pdfImage.height]);
+            page.drawImage(pdfImage, {
+              x: 0,
+              y: 0,
+              width: pdfImage.width,
+              height: pdfImage.height,
+            });
+          }
+        }
+        
+        const pdfBytes = await pdfDoc.save();
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        
+        Common.downloadBlob(blob, 'images-converted.pdf');
+        statusMsg.textContent = 'Done!';
+      } catch (err) {
+        console.error(err);
+        statusMsg.textContent = 'Error creating PDF.';
+        statusMsg.style.color = 'red';
+      } finally {
+        processBtn.disabled = false;
+        setTimeout(() => { if(statusMsg.textContent === 'Done!') statusMsg.textContent = ''; }, 3000);
+      }
+    });
+  </script>
+</body>
+</html>
